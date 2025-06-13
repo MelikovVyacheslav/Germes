@@ -1,4 +1,4 @@
-package org.slavik;
+package org.slavik.Items;
 
 public class Product {
     private final int product_id;
@@ -21,12 +21,12 @@ public class Product {
     private final int status;
     private final String dateAdded;
     private final String dateModify;
-    private final int dn_id;
+    private final int dnId;
 
     public Product(int product_id, String model, String sku, String ean, int quantity, int stockStatusId,
                    String image, int manufacturerId, int price, String dateAvailable, int weight,
                    int weightClassId, int length, int wight, int height, int lengthClassId, int subtract,
-                   int status, String dateAdded, String dateModify, int dn_id) {
+                   int status, String dateAdded, String dateModify, int dnId) {
         this.product_id = product_id;
         this.model = model;
         this.sku = sku;
@@ -47,7 +47,7 @@ public class Product {
         this.status = status;
         this.dateAdded = dateAdded;
         this.dateModify = dateModify;
-        this.dn_id = dn_id;
+        this.dnId = dnId;
     }
 
     public int getProduct_id() {
@@ -130,7 +130,7 @@ public class Product {
         return dateModify;
     }
 
-    public int getDn_id() {
-        return dn_id;
+    public int getDnId() {
+        return dnId;
     }
 }

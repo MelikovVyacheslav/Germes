@@ -6,13 +6,13 @@ public class WebClientConfiguration {
     private final ApiSourceConfiguration dioritConfiguration;
     private final ApiSourceConfiguration ocsConfiguration;
 
-    public WebClientConfiguration(ApiSourceConfiguration diorbitConfiguration,
+    public WebClientConfiguration(ApiSourceConfiguration dioritConfiguration,
                                   ApiSourceConfiguration ocsConfiguration) {
-        this.dioritConfiguration = diorbitConfiguration;
+        this.dioritConfiguration = dioritConfiguration;
         this.ocsConfiguration = ocsConfiguration;
     }
 
-    public WebClient diorbitWebClient() {
+    public WebClient dioritWebClient() {
         return createClientBuilder(dioritConfiguration).build();
     }
 
@@ -28,12 +28,4 @@ public class WebClientConfiguration {
                         .defaultCodecs()
                         .maxInMemorySize(configuration.maxInMemorySize()));
     }
-
-
-    public record ApiSourceConfiguration(
-            String baseUrl,
-            String token,
-            String tokenHeaderKey,
-            int maxInMemorySize
-    ) { }
 }
