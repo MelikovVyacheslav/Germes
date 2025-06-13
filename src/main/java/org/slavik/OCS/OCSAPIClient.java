@@ -4,21 +4,25 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slavik.AbstractApiClient;
 import org.slavik.ApiClient;
-import org.slavik.ApiSourceConfiguration;
+import org.slavik.DioritB2B.DioritAPISourceConfiguration;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
 
-public class OCSApiClient extends AbstractApiClient implements ApiClient {
+public class OCSAPIClient extends AbstractApiClient implements ApiClient {
 
-    private final ApiSourceConfiguration apiSourceConfiguration;
+    private final DioritAPISourceConfiguration apiSourceConfiguration
+             = new DioritAPISourceConfiguration(
+            "https://connector.b2b.ocs.ru/api/v2",
+            "TSWJXggwvt59l9nuYVvtSM?iyea0DR",
+            "X-API-Key",
+            100 * 1024 * 1024
+    );
 
-    public OCSApiClient(WebClient webClient, ApiSourceConfiguration apiSourceConfiguration) {
+    public OCSAPIClient(WebClient webClient) {
         super(webClient);
-        this.apiSourceConfiguration = apiSourceConfiguration;
     }
 
     public void getInformationByCategory() {
@@ -45,13 +49,13 @@ public class OCSApiClient extends AbstractApiClient implements ApiClient {
         System.out.println("Response: " + responseFlux);
     }
 
-    public void gettingInformationAboutTheProduct(String itemId) {
+    public void viewProduct(String productId) {
         WebClient webClient = WebClient.builder()
                 .codecs(configure -> configure
                         .defaultCodecs()
                         .maxInMemorySize(apiSourceConfiguration.maxInMemorySize())).build();
         String responseFlux = webClient.get()
-                .uri(apiSourceConfiguration.baseUrl() + "/catalog/products/" + itemId)
+                .uri(apiSourceConfiguration.baseUrl() + "/catalog/products/" + productId)
                 .header(apiSourceConfiguration.tokenHeaderKey(), apiSourceConfiguration.token())
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()

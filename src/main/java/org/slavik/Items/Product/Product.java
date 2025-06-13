@@ -1,4 +1,4 @@
-package org.slavik.Items;
+package org.slavik.Items.Product;
 
 public class Product {
     private final int product_id;

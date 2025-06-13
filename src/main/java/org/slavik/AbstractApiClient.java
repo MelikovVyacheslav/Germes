@@ -9,4 +9,9 @@ public class AbstractApiClient implements ApiClient {
     public AbstractApiClient(WebClient webClient) {
         this.webClient = webClient;
     }
+
+    @Override
+    public WebClient getWebClient() {
+        return webClient;
+    }
 }

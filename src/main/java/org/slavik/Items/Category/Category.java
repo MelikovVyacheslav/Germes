@@ -1,4 +1,4 @@
-package org.slavik.Items;
+package org.slavik.Items.Category;
 
 public class Category {
     private final int categoryId;
