@@ -2,10 +2,11 @@ package org.slavik.DioritB2B;
 
 import org.slavik.AbstractApiClient;
 import org.slavik.ApiClient;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+
+import java.nio.charset.StandardCharsets;
 
 public class DioritAPIClient extends AbstractApiClient implements ApiClient {
 
@@ -22,7 +23,7 @@ public class DioritAPIClient extends AbstractApiClient implements ApiClient {
         super(webClient);
     }
 
-    public void gettingListOfProducts() {
+    public String gettingListOfProducts() {
         String responseFlux = webClient.get()
                 .uri(apiSourceConfiguration.baseUrl() + "/api/products")
                 .header(apiSourceConfiguration.tokenHeaderKey(), apiSourceConfiguration.token())
@@ -42,14 +43,16 @@ public class DioritAPIClient extends AbstractApiClient implements ApiClient {
                 })
                 .bodyToMono(String.class)
                 .block();
-        System.out.println("Response: " + responseFlux);
+//        System.out.println("Response: " + responseFlux);
+        return responseFlux;
     }
 
-    public void viewProduct(String productId) {
+    public String viewProduct(String productId) {
         String responseFlux = webClient.get()
                 .uri(apiSourceConfiguration.baseUrl() + "/api/products/" + productId)
                 .header(apiSourceConfiguration.tokenHeaderKey(), apiSourceConfiguration.token())
                 .accept(MediaType.APPLICATION_JSON)
+                .acceptCharset(StandardCharsets.UTF_8)
                 .retrieve()
                 .onStatus((code) -> {
                     if (code.is4xxClientError() || code.is5xxServerError()) {
@@ -66,5 +69,6 @@ public class DioritAPIClient extends AbstractApiClient implements ApiClient {
                 .bodyToMono(String.class)
                 .block();
         System.out.println("Response: " + responseFlux);
+        return responseFlux;
     }
 }

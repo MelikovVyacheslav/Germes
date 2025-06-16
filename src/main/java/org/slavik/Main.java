@@ -2,14 +2,17 @@ package org.slavik;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slavik.DioritB2B.DioritAPIClient;
 import org.slavik.DioritB2B.DioritAPISourceConfiguration;
-import org.slavik.OCS.OCSAPIClient;
+import org.slavik.DioritB2B.DioritOpenCartManager;
+
+import java.sql.SQLException;
 
 public class Main {
-    public static void main(String[] args) throws InterruptedException, JsonProcessingException {
+    public static void main(String[] args) throws InterruptedException, JsonProcessingException, SQLException {
         ConnectionManager connectionManager = new ConnectionManager(
-                "jdbc:mysql://localhost:3306/",
+                "jdbc:mysql://localhost:3306/u3045843_default?useUnicode=true&characterEncoding=UTF-8",
                 "root",
                 "221633"
         );
@@ -34,11 +37,8 @@ public class Main {
         DioritAPIClient dioritApiClient
                 = new DioritAPIClient(webClientConfiguration.dioritWebClient());
 
-        OCSAPIClient ocsApiClient =
-                new OCSAPIClient(webClientConfiguration.ocsWebClient());
-
-        dioritApiClient.gettingListOfProducts();
-//        dioritApiClient.viewProduct("656f876c-fd14-11e8-b41c-2c44fd933bfd");
-
+        DioritOpenCartManager dioritOpenCartManager =
+                new DioritOpenCartManager(connectionManager.getConnection(), dioritApiClient);
+        dioritOpenCartManager.addAllNewProducts();
     }
 }

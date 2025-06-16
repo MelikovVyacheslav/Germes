@@ -25,7 +25,7 @@ public class OCSAPIClient extends AbstractApiClient implements ApiClient {
         super(webClient);
     }
 
-    public void getInformationByCategory() {
+    public String getInformationByCategory() {
         WebClient webClient = WebClient.create();
         String responseFlux = webClient.get()
                 .uri("/catalog/categories")
@@ -47,9 +47,10 @@ public class OCSAPIClient extends AbstractApiClient implements ApiClient {
                 .bodyToMono(String.class)
                 .block();
         System.out.println("Response: " + responseFlux);
+        return responseFlux;
     }
 
-    public void viewProduct(String productId) {
+    public String viewProduct(String productId) {
         WebClient webClient = WebClient.builder()
                 .codecs(configure -> configure
                         .defaultCodecs()
@@ -74,9 +75,10 @@ public class OCSAPIClient extends AbstractApiClient implements ApiClient {
                 .bodyToMono(String.class)
                 .block();
         System.out.println("Response: " + responseFlux);
+        return responseFlux;
     }
 
-    public void gettingInformationByProductCategory(String category) {
+    public String gettingInformationByProductCategory(String category) {
         WebClient webClient = WebClient.builder()
                 .codecs(configure -> configure
                         .defaultCodecs()
@@ -102,9 +104,10 @@ public class OCSAPIClient extends AbstractApiClient implements ApiClient {
                 .bodyToMono(String.class)
                 .block();
         System.out.println("Response: " + responseFlux);
+        return responseFlux;
     }
 
-    public void gettingInformationByProductsCategories(List<String> batchCategories) throws JsonProcessingException {
+    public String gettingInformationByProductsCategories(List<String> batchCategories) throws JsonProcessingException {
         WebClient webClient = WebClient.builder()
                 .codecs(configure -> configure
                         .defaultCodecs()
@@ -134,9 +137,10 @@ public class OCSAPIClient extends AbstractApiClient implements ApiClient {
                 .bodyToMono(String.class)
                 .block();
         System.out.println("Response: " + responseFlux);
+        return responseFlux;
     }
 
-    public void gettingInformationAboutTheProducts(List<String> batchItemIds) throws JsonProcessingException {
+    public String gettingInformationAboutTheProducts(List<String> batchItemIds) throws JsonProcessingException {
         WebClient webClient = WebClient.builder()
                 .codecs(configure -> configure
                         .defaultCodecs()
@@ -166,5 +170,6 @@ public class OCSAPIClient extends AbstractApiClient implements ApiClient {
                 .bodyToMono(String.class)
                 .block();
         System.out.println("Response: " + responseFlux);
+        return responseFlux;
     }
 }

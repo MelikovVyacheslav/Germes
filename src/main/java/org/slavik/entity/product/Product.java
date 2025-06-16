@@ -1,7 +1,14 @@
-package org.slavik.Items.Product;
+package org.slavik.entity.product;
+
+import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.Nullable;
+import org.springframework.jdbc.core.RowMapper;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class Product {
-    private final int product_id;
+    private final int productId;
     private final String model;
     private final String sku;
     private final String ean;
@@ -14,7 +21,7 @@ public class Product {
     private final int weight;
     private final int weightClassId;
     private final int length;
-    private final int wight;
+    private final int width;
     private final int height;
     private final int lengthClassId;
     private final int subtract;
@@ -23,11 +30,11 @@ public class Product {
     private final String dateModify;
     private final int dnId;
 
-    public Product(int product_id, String model, String sku, String ean, int quantity, int stockStatusId,
+    public Product(int productId, String model, String sku, String ean, int quantity, int stockStatusId,
                    String image, int manufacturerId, int price, String dateAvailable, int weight,
                    int weightClassId, int length, int wight, int height, int lengthClassId, int subtract,
                    int status, String dateAdded, String dateModify, int dnId) {
-        this.product_id = product_id;
+        this.productId = productId;
         this.model = model;
         this.sku = sku;
         this.ean = ean;
@@ -40,7 +47,7 @@ public class Product {
         this.weight = weight;
         this.weightClassId = weightClassId;
         this.length = length;
-        this.wight = wight;
+        this.width = wight;
         this.height = height;
         this.lengthClassId = lengthClassId;
         this.subtract = subtract;
@@ -50,8 +57,8 @@ public class Product {
         this.dnId = dnId;
     }
 
-    public int getProduct_id() {
-        return product_id;
+    public int getProductId() {
+        return productId;
     }
 
     public String getModel() {
@@ -102,8 +109,8 @@ public class Product {
         return length;
     }
 
-    public int getWight() {
-        return wight;
+    public int getWidth() {
+        return width;
     }
 
     public int getHeight() {
@@ -132,5 +139,56 @@ public class Product {
 
     public int getDnId() {
         return dnId;
+    }
+
+    static class Mapper implements RowMapper<Product> {
+
+        @Override
+        public @Nullable Product mapRow(@NotNull ResultSet rs, int rowNum) throws SQLException {
+            int productId = rs.getInt("product_id");
+            String model = rs.getString("model");
+            String sku = rs.getString("sku");
+            String ean = rs.getString("ean");
+            int quantity = rs.getInt("quantity");
+            int stockStatusId = rs.getInt("stockStatusId");
+            String image = rs.getString("image");
+            int manufacturerId = rs.getInt("manufacturer_id");
+            int price = rs.getInt("price");
+            String dateAvailable = rs.getString("date_available");
+            int weight = rs.getInt("weight");
+            int weightClassId = rs.getInt("weigh_clas_id");
+            int length = rs.getInt("length");
+            int wight = rs.getInt("wight");
+            int height = rs.getInt("height");
+            int lengthClassId = rs.getInt("length_class_id");
+            int subtract = rs.getInt("subtract");
+            int status = rs.getInt("status");
+            String dateAdded = rs.getString("date_added");
+            String dateModify = rs.getString("date_modify");
+            int dnId = rs.getInt("dn_id");
+            return new Product(
+                productId,
+                    model,
+                    sku,
+                    ean,
+                    quantity,
+                    stockStatusId,
+                    image,
+                    manufacturerId,
+                    price,
+                    dateAvailable,
+                    weight,
+                    weightClassId,
+                    length,
+                    wight,
+                    height,
+                    lengthClassId,
+                    subtract,
+                    status,
+                    dateAdded,
+                    dateModify,
+                    dnId
+            );
+        }
     }
 }
