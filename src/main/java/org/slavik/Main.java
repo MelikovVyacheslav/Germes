@@ -2,22 +2,16 @@ package org.slavik;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.slavik.DioritB2B.DioritAPIClient;
+import org.slavik.DioritB2B.DioritAPIClientImpl;
 import org.slavik.DioritB2B.DioritAPISourceConfiguration;
 import org.slavik.DioritB2B.DioritOpenCartManager;
+import org.slavik.OCS.OCSAPIClientImpl;
+import org.slavik.OCS.OCSApiClient;
 
 import java.sql.SQLException;
 
 public class Main {
     public static void main(String[] args) throws InterruptedException, JsonProcessingException, SQLException {
-        ConnectionManager connectionManager = new ConnectionManager(
-                "jdbc:mysql://localhost:3306/u3045843_default?useUnicode=true&characterEncoding=UTF-8",
-                "root",
-                "221633"
-        );
-        connectionManager.connection();
-
         WebClientConfiguration webClientConfiguration =
                 new WebClientConfiguration(
                         new DioritAPISourceConfiguration(
@@ -34,11 +28,22 @@ public class Main {
                         )
                 );
 
-        DioritAPIClient dioritApiClient
-                = new DioritAPIClient(webClientConfiguration.dioritWebClient());
+        OCSApiClient client = new OCSAPIClientImpl(webClientConfiguration.ocsWebClient());
+        System.out.println(client.getAll());
+//        ConnectionManager connectionManager = new ConnectionManager(
+//                "jdbc:mysql://localhost:3306/u3045843_default?useUnicode=true&characterEncoding=UTF-8",
+//                "root",
+//                "221633"
+//        );
+//        connectionManager.connection();
+//
 
-        DioritOpenCartManager dioritOpenCartManager =
-                new DioritOpenCartManager(connectionManager.getConnection(), dioritApiClient);
-        dioritOpenCartManager.addAllNewProducts();
+//
+//        DioritAPIClientImpl dioritApiClient
+//                = new DioritAPIClientImpl(webClientConfiguration.dioritWebClient());
+//
+//        DioritOpenCartManager dioritOpenCartManager =
+//                new DioritOpenCartManager(connectionManager.getConnection(), dioritApiClient);
+//        dioritOpenCartManager.addAllNewProducts();
     }
 }

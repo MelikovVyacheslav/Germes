@@ -9,25 +9,19 @@ import java.sql.SQLException;
 
 public class Category {
     private final int categoryId;
-    private final String image;
     private final int parentId;
     private final String dateAdded;
-    private final String dateModify;
+    private final String dateModified;
 
-    public Category(int categoryId, String image, int parentId, String dateAdded, String dateModify) {
+    public Category(int categoryId, int parentId, String dateAdded, String dateModified) {
         this.categoryId = categoryId;
-        this.image = image;
         this.parentId = parentId;
         this.dateAdded = dateAdded;
-        this.dateModify = dateModify;
+        this.dateModified = dateModified;
     }
 
     public int getCategoryId() {
         return categoryId;
-    }
-
-    public String getImage() {
-        return image;
     }
 
     public int getParentId() {
@@ -38,8 +32,8 @@ public class Category {
         return dateAdded;
     }
 
-    public String getDateModify() {
-        return dateModify;
+    public String getDateModified() {
+        return dateModified;
     }
 
     public static class Mapper implements RowMapper<Category> {
@@ -47,13 +41,11 @@ public class Category {
         @Override
         public @Nullable Category mapRow(@NotNull ResultSet rs, int rowNum) throws SQLException {
             int categoryId = rs.getInt("category_id");
-            String image = rs.getString("image");
             int parentId = rs.getInt("parent_id");
             String dateAdded = rs.getString("date_added");
-            String dateModify = rs.getString("date_modify");
+            String dateModify = rs.getString("date_modified");
             return new Category(
                     categoryId,
-                    image,
                     parentId,
                     dateAdded,
                     dateModify

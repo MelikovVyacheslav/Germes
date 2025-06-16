@@ -2,13 +2,16 @@ package org.slavik.DioritB2B;
 
 import org.slavik.AbstractApiClient;
 import org.slavik.ApiClient;
+import org.slavik.entity.category.Category;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
-public class DioritAPIClient extends AbstractApiClient implements ApiClient {
+public class DioritAPIClientImpl extends AbstractApiClient implements DioritApiClient {
+
 
 
     private final DioritAPISourceConfiguration apiSourceConfiguration
@@ -19,7 +22,7 @@ public class DioritAPIClient extends AbstractApiClient implements ApiClient {
             100 * 1024 * 1024
     );
 
-    public DioritAPIClient(WebClient webClient) {
+    public DioritAPIClientImpl(WebClient webClient) {
         super(webClient);
     }
 
@@ -70,5 +73,10 @@ public class DioritAPIClient extends AbstractApiClient implements ApiClient {
                 .block();
         System.out.println("Response: " + responseFlux);
         return responseFlux;
+    }
+
+    @Override
+    public List<Category> getAll() {
+        return List.of();
     }
 }

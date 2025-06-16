@@ -3,15 +3,15 @@ package org.slavik.OCS;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slavik.AbstractApiClient;
-import org.slavik.ApiClient;
 import org.slavik.DioritB2B.DioritAPISourceConfiguration;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
 
-public class OCSAPIClient extends AbstractApiClient implements ApiClient {
+public class OCSAPIClientImpl extends AbstractApiClient implements OCSApiClient {
 
     private final DioritAPISourceConfiguration apiSourceConfiguration
              = new DioritAPISourceConfiguration(
@@ -21,7 +21,7 @@ public class OCSAPIClient extends AbstractApiClient implements ApiClient {
             100 * 1024 * 1024
     );
 
-    public OCSAPIClient(WebClient webClient) {
+    public OCSAPIClientImpl(WebClient webClient) {
         super(webClient);
     }
 
@@ -171,5 +171,17 @@ public class OCSAPIClient extends AbstractApiClient implements ApiClient {
                 .block();
         System.out.println("Response: " + responseFlux);
         return responseFlux;
+    }
+
+    @Override
+    public List<OCSCategory> getAll() {
+        List<OCSCategory> response = webClient.get()
+                .uri("/catalog/categories")
+                .header(apiSourceConfiguration.tokenHeaderKey(), apiSourceConfiguration.token())  // Замени токен!
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<List<OCSCategory>>() {})
+                .block();
+        return response;
     }
 }

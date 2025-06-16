@@ -17,21 +17,17 @@ import java.util.List;
 public class DioritOpenCartManager {
 
     private final NamedParameterJdbcOperations jdbcOperations;
-    private final DioritAPIClient dioritAPIClient;
+    private final DioritAPIClientImpl dioritAPIClient;
     Connection con;
 
-    public DioritOpenCartManager(NamedParameterJdbcOperations jdbcOperations, Connection connection, DioritAPIClient dioritAPIClient) {
+    public DioritOpenCartManager(NamedParameterJdbcOperations jdbcOperations, Connection connection, DioritAPIClientImpl dioritAPIClient) {
         this.jdbcOperations = jdbcOperations;
         this.con = connection;
         this.dioritAPIClient = dioritAPIClient;
         List<Product> products = jdbcOperations.query("", new RowMapper<>() {
             @Override
             public @Nullable Product mapRow(ResultSet rs, int rowNum) throws SQLException {
-                return new Product(
-                        rs.getInt("product_id"),
-
-
-                );
+                return null;
             }
         });
     }

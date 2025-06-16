@@ -30,7 +30,7 @@ public class CategoryDescription {
         return meta;
     }
 
-    static class Mapper implements RowMapper<CategoryDescription> {
+    public static class Mapper implements RowMapper<CategoryDescription> {
 
         @Override
         public @Nullable CategoryDescription mapRow(@NotNull ResultSet rs, int rowNum) throws SQLException {
