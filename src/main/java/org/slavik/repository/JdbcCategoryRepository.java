@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class JdbcCategoryRepository implements CategoryRepository {
@@ -44,17 +45,14 @@ public class JdbcCategoryRepository implements CategoryRepository {
 
     @Override
     public List<Category> findAll(int[] categoryIds) {
-        List<Category> categories = new ArrayList<>();
+        String ids = Arrays.toString(categoryIds);
         String sql = """
                 SELECT * FROM oc_category
-                where category_id = :id;
+                where category_id in (:ids);
                 """;
         MapSqlParameterSource params = new MapSqlParameterSource();
-        for (int id : categoryIds) {
-            params.addValue("id", id);
-            Category createdCategory = jdbcOperations.queryForObject(sql, params, new Category.Mapper());
-            categories.add(createdCategory);
-        }
+        params.addValue("ids", ids);
+        List<Category> categories = jdbcOperations.query(sql, new Category.Mapper());
         return categories;
     }
 

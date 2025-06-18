@@ -177,7 +177,7 @@ public class OCSAPIClientImpl extends AbstractApiClient implements OCSApiClient 
     public List<OCSCategory> getAll() {
         List<OCSCategory> response = webClient.get()
                 .uri("/catalog/categories")
-                .header(apiSourceConfiguration.tokenHeaderKey(), apiSourceConfiguration.token())  // Замени токен!
+                .header(apiSourceConfiguration.tokenHeaderKey(), apiSourceConfiguration.token())
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<List<OCSCategory>>() {})

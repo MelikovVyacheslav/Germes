@@ -2,11 +2,7 @@ package org.slavik;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.slavik.DioritB2B.DioritAPIClientImpl;
 import org.slavik.DioritB2B.DioritAPISourceConfiguration;
-import org.slavik.DioritB2B.DioritOpenCartManager;
-import org.slavik.OCS.OCSAPIClientImpl;
-import org.slavik.OCS.OCSApiClient;
 
 import java.sql.SQLException;
 
@@ -28,17 +24,20 @@ public class Main {
                         )
                 );
 
-        OCSApiClient client = new OCSAPIClientImpl(webClientConfiguration.ocsWebClient());
-        System.out.println(client.getAll());
-//        ConnectionManager connectionManager = new ConnectionManager(
-//                "jdbc:mysql://localhost:3306/u3045843_default?useUnicode=true&characterEncoding=UTF-8",
-//                "root",
-//                "221633"
-//        );
-//        connectionManager.connection();
-//
+//        OCSApiClient client = new OCSAPIClientImpl(webClientConfiguration.ocsWebClient());
+//        System.out.println(client.getAll());
+//        NamedParameterJdbcOperations jdbcOperations = new NamedParameterJdbcTemplate();
+//        JdbcCategoryRepository jdbcCategoryRepository = new JdbcCategoryRepository()
+//        System.out.println();
+        ConnectionManager connectionManager = new ConnectionManager(
+                "jdbc:mysql://localhost:3306/u3045843_default?useUnicode=true&characterEncoding=UTF-8",
+                "root",
+                "221633"
+        );
+        connectionManager.connection();
 
-//
+
+
 //        DioritAPIClientImpl dioritApiClient
 //                = new DioritAPIClientImpl(webClientConfiguration.dioritWebClient());
 //

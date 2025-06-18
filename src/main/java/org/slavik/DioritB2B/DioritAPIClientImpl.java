@@ -1,8 +1,9 @@
 package org.slavik.DioritB2B;
 
 import org.slavik.AbstractApiClient;
-import org.slavik.ApiClient;
+import org.slavik.DioritB2B.model.DioritCategory;
 import org.slavik.entity.category.Category;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -46,7 +47,7 @@ public class DioritAPIClientImpl extends AbstractApiClient implements DioritApiC
                 })
                 .bodyToMono(String.class)
                 .block();
-//        System.out.println("Response: " + responseFlux);
+        System.out.println("Response: " + responseFlux);
         return responseFlux;
     }
 
@@ -76,7 +77,15 @@ public class DioritAPIClientImpl extends AbstractApiClient implements DioritApiC
     }
 
     @Override
-    public List<Category> getAll() {
-        return List.of();
+    public List<DioritCategory> getAll() {
+        List<DioritCategory> response = webClient.get()
+                .uri(apiSourceConfiguration.baseUrl() + "/api/products")
+                .header(apiSourceConfiguration.tokenHeaderKey(), apiSourceConfiguration.token())
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<List<DioritCategory>>() {})
+                .block();
+//        System.out.println("Response: " + responseFlux);
+        return response;
     }
 }
