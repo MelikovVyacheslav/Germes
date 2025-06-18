@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slavik.AbstractApiClient;
 import org.slavik.ApiClient;
+import org.slavik.ConnectionManager;
 import org.slavik.DioritB2B.DioritAPISourceConfiguration;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -12,17 +13,19 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 
 public class OCSAPIClient extends AbstractApiClient implements ApiClient {
+    private final OcsOpenCartManager ocsOpenCartManager;
 
     private final DioritAPISourceConfiguration apiSourceConfiguration
-             = new DioritAPISourceConfiguration(
+            = new DioritAPISourceConfiguration(
             "https://connector.b2b.ocs.ru/api/v2",
             "TSWJXggwvt59l9nuYVvtSM?iyea0DR",
             "X-API-Key",
             100 * 1024 * 1024
     );
 
-    public OCSAPIClient(WebClient webClient) {
+    public OCSAPIClient(WebClient webClient, ConnectionManager connection) {
         super(webClient);
+        this.ocsOpenCartManager = new OcsOpenCartManager(connection);
     }
 
     public String getInformationByCategory() {
@@ -47,6 +50,14 @@ public class OCSAPIClient extends AbstractApiClient implements ApiClient {
                 .bodyToMono(String.class)
                 .block();
         System.out.println("Response: " + responseFlux);
+
+        if (responseFlux != null && !responseFlux.isEmpty()) {
+            try {
+                ocsOpenCartManager.saveProductsFromJson(responseFlux);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
         return responseFlux;
     }
 
@@ -75,6 +86,13 @@ public class OCSAPIClient extends AbstractApiClient implements ApiClient {
                 .bodyToMono(String.class)
                 .block();
         System.out.println("Response: " + responseFlux);
+        if (responseFlux != null && !responseFlux.isEmpty()) {
+            try {
+                ocsOpenCartManager.saveProductsFromJson(responseFlux);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
         return responseFlux;
     }
 
@@ -104,6 +122,13 @@ public class OCSAPIClient extends AbstractApiClient implements ApiClient {
                 .bodyToMono(String.class)
                 .block();
         System.out.println("Response: " + responseFlux);
+        if (responseFlux != null && !responseFlux.isEmpty()) {
+            try {
+                ocsOpenCartManager.saveProductsFromJson(responseFlux);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
         return responseFlux;
     }
 
@@ -137,6 +162,13 @@ public class OCSAPIClient extends AbstractApiClient implements ApiClient {
                 .bodyToMono(String.class)
                 .block();
         System.out.println("Response: " + responseFlux);
+        if (responseFlux != null && !responseFlux.isEmpty()) {
+            try {
+                ocsOpenCartManager.saveProductsFromJson(responseFlux);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
         return responseFlux;
     }
 
@@ -170,6 +202,14 @@ public class OCSAPIClient extends AbstractApiClient implements ApiClient {
                 .bodyToMono(String.class)
                 .block();
         System.out.println("Response: " + responseFlux);
+        if (responseFlux != null && !responseFlux.isEmpty()) {
+            try {
+                ocsOpenCartManager.saveProductsFromJson(responseFlux);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
         return responseFlux;
     }
 }
