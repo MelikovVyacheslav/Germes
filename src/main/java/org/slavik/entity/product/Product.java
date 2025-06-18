@@ -141,7 +141,7 @@ public class Product {
         return dnId;
     }
 
-    static class Mapper implements RowMapper<Product> {
+    public static class Mapper implements RowMapper<Product> {
 
         @Override
         public @Nullable Product mapRow(@NotNull ResultSet rs, int rowNum) throws SQLException {

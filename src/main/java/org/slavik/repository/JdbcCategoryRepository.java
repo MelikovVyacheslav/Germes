@@ -34,4 +34,5 @@ public class JdbcCategoryRepository implements CategoryRepository {
         List<Category> categories = jdbcOperations.query(sql, new Category.Mapper());
         return categories;
     }
+
 }

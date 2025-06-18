@@ -30,7 +30,7 @@ public class ProductDescription {
         return description;
     }
 
-    static class Mapper implements RowMapper<ProductDescription> {
+    public static class Mapper implements RowMapper<ProductDescription> {
 
         @Override
         public @Nullable ProductDescription mapRow(@NotNull ResultSet rs, int rowNum) throws SQLException {

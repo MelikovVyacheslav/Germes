@@ -28,10 +28,7 @@ public class DioritOpenCartManager {
             @Override
             public @Nullable Product mapRow(ResultSet rs, int rowNum) throws SQLException {
                 return new Product(
-                        rs.getInt("product_id"),
-
-
-                );
+                        rs.getInt("product_id");
             }
         });
     }
