@@ -1,14 +1,19 @@
 package org.slavik.DioritB2B;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import org.slavik.AbstractApiClient;
+import org.slavik.DioritB2B.model.Datum;
 import org.slavik.DioritB2B.model.DioritCategory;
+import org.slavik.DioritB2B.model.DioritProductResponse;
 import org.slavik.entity.product.Product;
+import org.slavik.entity.product.ProductDescription;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 
 public class DioritAPIClientImpl extends AbstractApiClient implements DioritApiClient {
@@ -45,7 +50,6 @@ public class DioritAPIClientImpl extends AbstractApiClient implements DioritApiC
                 })
                 .bodyToMono(String.class)
                 .block();
-        System.out.println("Response: " + responseFlux);
         return responseFlux;
     }
 
@@ -75,24 +79,19 @@ public class DioritAPIClientImpl extends AbstractApiClient implements DioritApiC
     }
 
     @Override
-    public List<Product> getAllProduct() {
-        List<Product> response = List.of();
+    public List<Datum> getAllProduct() {
+        List<Datum> response = new ArrayList<>();
         for (int i = 1; i <= 36; i++) {
-            List<Product> request = webClient.get()
+            DioritProductResponse productResponse = webClient.get()
                     .uri(apiSourceConfiguration.baseUrl() + "/api/products?page=" + i)
                     .header(apiSourceConfiguration.tokenHeaderKey(), apiSourceConfiguration.token())
                     .accept(MediaType.APPLICATION_JSON)
                     .retrieve()
-                    .bodyToMono(new ParameterizedTypeReference<List<Product>>() {})
+                    .bodyToMono(DioritProductResponse.class)
                     .block();
-            assert request != null;
-            response.addAll(request);
+                response.addAll(productResponse.getData());
         }
         return response;
     }
 
-    @Override
-    public List<DioritCategory> getAllCategory() {
-        return List.of();
-    }
 }

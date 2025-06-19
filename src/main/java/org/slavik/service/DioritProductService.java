@@ -1,7 +1,10 @@
 package org.slavik.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import org.slavik.DioritB2B.DioritAPIClientImpl;
+import org.slavik.DioritB2B.model.Datum;
+import org.slavik.DioritB2B.model.DioritProductResponse;
 import org.slavik.entity.product.Product;
 import org.slavik.entity.product.ProductDescription;
 import org.slavik.repository.JdbcProductDescriptionRepository;
@@ -27,20 +30,6 @@ public class DioritProductService implements ProductService {
 
     @Override
     public void sync() throws JsonProcessingException {
-        List<Product> allProductListAPI = apiClient.getAllProduct();
-        List<ProductDescription> allProductListDataBase = jdbcProductDescriptionRepository.findAll();
-        boolean isThereProduct = false;
-        for (Product productAPI : allProductListAPI) {
-            for (ProductDescription productDescription : allProductListDataBase) {
-                if (productAPI.getProductId() == productDescription.getProductId()) {
-                    isThereProduct = true;
-                    break;
-                }
-            }
-            if (!isThereProduct) {
-                Product newProduct = jdbcProductRepository.create(productAPI);
-                jdbcProductDescriptionRepository.create();
-            }
-        }
+        List<Datum> datumList = apiClient.getAllProduct();
     }
 }

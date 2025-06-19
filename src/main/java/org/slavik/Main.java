@@ -4,11 +4,15 @@ package org.slavik;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slavik.DioritB2B.DioritAPIClientImpl;
 import org.slavik.DioritB2B.DioritAPISourceConfiguration;
+import org.slavik.DioritB2B.model.Datum;
 
+import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Main {
-    public static void main(String[] args) throws InterruptedException, JsonProcessingException, SQLException {
+    public static void main(String[] args) throws InterruptedException, IOException, SQLException {
         WebClientConfiguration webClientConfiguration =
                 new WebClientConfiguration(
                         new DioritAPISourceConfiguration(
@@ -25,11 +29,6 @@ public class Main {
                         )
                 );
 
-//        OCSApiClient client = new OCSAPIClientImpl(webClientConfiguration.ocsWebClient());
-//        System.out.println(client.getAll());
-//        NamedParameterJdbcOperations jdbcOperations = new NamedParameterJdbcTemplate();
-//        JdbcCategoryRepository jdbcCategoryRepository = new JdbcCategoryRepository()
-//        System.out.println();
         ConnectionManager connectionManager = new ConnectionManager(
                 "jdbc:mysql://localhost:3306/u3045843_default?useUnicode=true&characterEncoding=UTF-8",
                 "root",
@@ -38,13 +37,10 @@ public class Main {
         connectionManager.connection();
 
         DioritAPIClientImpl dioritAPIClient = new DioritAPIClientImpl(webClientConfiguration.dioritWebClient());
-        dioritAPIClient.getAllProduct();
+        List<Datum> datumList = dioritAPIClient.getAllProduct();
+        for (Datum datum : datumList) {
+            System.out.println(datum.getName());
+        }
 
-//        DioritAPIClientImpl dioritApiClient
-//                = new DioritAPIClientImpl(webClientConfiguration.dioritWebClient());
-//
-//        DioritOpenCartManager dioritOpenCartManager =
-//                new DioritOpenCartManager(connectionManager.getConnection(), dioritApiClient);
-//        dioritOpenCartManager.addAllNewProducts();
     }
 }
