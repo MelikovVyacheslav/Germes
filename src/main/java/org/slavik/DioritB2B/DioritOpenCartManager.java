@@ -3,16 +3,12 @@ package org.slavik.DioritB2B;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.jspecify.annotations.Nullable;
-import org.slavik.entity.product.Product;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
 
 public class DioritOpenCartManager {
 
@@ -20,16 +16,11 @@ public class DioritOpenCartManager {
     private final DioritAPIClientImpl dioritAPIClient;
     Connection con;
 
-    public DioritOpenCartManager(NamedParameterJdbcOperations jdbcOperations, Connection connection, DioritAPIClientImpl dioritAPIClient) {
+    public DioritOpenCartManager(NamedParameterJdbcOperations jdbcOperations,
+                                 Connection connection, DioritAPIClientImpl dioritAPIClient) {
         this.jdbcOperations = jdbcOperations;
         this.con = connection;
         this.dioritAPIClient = dioritAPIClient;
-        List<Product> products = jdbcOperations.query("", new RowMapper<>() {
-            @Override
-            public @Nullable Product mapRow(ResultSet rs, int rowNum) throws SQLException {
-                return null;
-            }
-        });
     }
 
     private final ObjectMapper objectMapper = new ObjectMapper();

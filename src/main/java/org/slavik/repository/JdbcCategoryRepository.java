@@ -4,18 +4,17 @@ import org.slavik.entity.category.Category;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class JdbcCategoryRepository implements CategoryRepository {
     private final NamedParameterJdbcOperations jdbcOperations;
 
-    final int TOP_VALUE = 0;
-    final int COLUMN_VALUE = 1;
-    final int SORT_ORDER = 0;
-    final int STATUS_VALUE = 1;
-    final int NOINDEX_VALUE = 1;
+    private final int TOP_VALUE = 1;
+    private final int COLUMN_VALUE = 1;
+    private final int SORT_ORDER = 0;
+    private final int STATUS_VALUE = 1;
+    private final int NOINDEX_VALUE = 1;
 
     public JdbcCategoryRepository(NamedParameterJdbcOperations jdbcOperations) {
         this.jdbcOperations = jdbcOperations;
@@ -92,4 +91,5 @@ public class JdbcCategoryRepository implements CategoryRepository {
         Category updatedCategory = jdbcOperations.queryForObject(sql, params, new Category.Mapper());
         return null;
     }
+
 }

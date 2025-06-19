@@ -2,6 +2,7 @@ package org.slavik;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.slavik.DioritB2B.DioritAPIClientImpl;
 import org.slavik.DioritB2B.DioritAPISourceConfiguration;
 
 import java.sql.SQLException;
@@ -36,7 +37,8 @@ public class Main {
         );
         connectionManager.connection();
 
-
+        DioritAPIClientImpl dioritAPIClient = new DioritAPIClientImpl(webClientConfiguration.dioritWebClient());
+        dioritAPIClient.getAllProduct();
 
 //        DioritAPIClientImpl dioritApiClient
 //                = new DioritAPIClientImpl(webClientConfiguration.dioritWebClient());

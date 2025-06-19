@@ -2,7 +2,7 @@ package org.slavik.DioritB2B;
 
 import org.slavik.AbstractApiClient;
 import org.slavik.DioritB2B.model.DioritCategory;
-import org.slavik.entity.category.Category;
+import org.slavik.entity.product.Product;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -12,8 +12,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 public class DioritAPIClientImpl extends AbstractApiClient implements DioritApiClient {
-
-
 
     private final DioritAPISourceConfiguration apiSourceConfiguration
             = new DioritAPISourceConfiguration(
@@ -77,15 +75,24 @@ public class DioritAPIClientImpl extends AbstractApiClient implements DioritApiC
     }
 
     @Override
-    public List<DioritCategory> getAll() {
-        List<DioritCategory> response = webClient.get()
-                .uri(apiSourceConfiguration.baseUrl() + "/api/products")
-                .header(apiSourceConfiguration.tokenHeaderKey(), apiSourceConfiguration.token())
-                .accept(MediaType.APPLICATION_JSON)
-                .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<List<DioritCategory>>() {})
-                .block();
-//        System.out.println("Response: " + responseFlux);
+    public List<Product> getAllProduct() {
+        List<Product> response = List.of();
+        for (int i = 1; i <= 36; i++) {
+            List<Product> request = webClient.get()
+                    .uri(apiSourceConfiguration.baseUrl() + "/api/products?page=" + i)
+                    .header(apiSourceConfiguration.tokenHeaderKey(), apiSourceConfiguration.token())
+                    .accept(MediaType.APPLICATION_JSON)
+                    .retrieve()
+                    .bodyToMono(new ParameterizedTypeReference<List<Product>>() {})
+                    .block();
+            assert request != null;
+            response.addAll(request);
+        }
         return response;
+    }
+
+    @Override
+    public List<DioritCategory> getAllCategory() {
+        return List.of();
     }
 }

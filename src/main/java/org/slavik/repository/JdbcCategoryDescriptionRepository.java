@@ -1,19 +1,18 @@
 package org.slavik.repository;
 
-import org.slavik.entity.category.Category;
 import org.slavik.entity.category.CategoryDescription;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-public class JdbcCategoryDescription implements CategoryDescriptionRepository {
+public class JdbcCategoryDescriptionRepository implements CategoryDescriptionRepository {
     private final NamedParameterJdbcOperations jdbcOperations;
 
     private final int LANGUAGE_ID_VALUE = 1;
 
-    public JdbcCategoryDescription(NamedParameterJdbcOperations jdbcOperations) {
+    public JdbcCategoryDescriptionRepository(NamedParameterJdbcOperations jdbcOperations) {
         this.jdbcOperations = jdbcOperations;
     }
 
@@ -40,19 +39,16 @@ public class JdbcCategoryDescription implements CategoryDescriptionRepository {
     }
 
     @Override
-    public List<CategoryDescription> findAll(int[] categoryIds) {
-        List<CategoryDescription> categoryDescriptions = new ArrayList<>();
+    public List<CategoryDescription> findAll(int[] categoryDescriptionIds) {
+        String ids = Arrays.toString(categoryDescriptionIds);
         String sql = """
                 SELECT * FROM oc_category
-                where category_id = :id;
+                where category_id in (:ids);
                 """;
         MapSqlParameterSource params = new MapSqlParameterSource();
-        for (int id : categoryIds) {
-            params.addValue("id", id);
-            CategoryDescription categoryDescription
-                    = jdbcOperations.queryForObject(sql, params, new CategoryDescription.Mapper());
-            categoryDescriptions.add(categoryDescription);
-        }
+        params.addValue("ids", ids);
+        List<CategoryDescription> categoryDescriptions
+                = jdbcOperations.query(sql, new CategoryDescription.Mapper());
         return categoryDescriptions;
     }
 

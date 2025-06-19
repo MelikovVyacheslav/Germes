@@ -3,15 +3,15 @@ package org.slavik.OCS;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slavik.AbstractApiClient;
+import org.slavik.ApiClient;
 import org.slavik.DioritB2B.DioritAPISourceConfiguration;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
 
-public class OCSAPIClientImpl extends AbstractApiClient implements OCSApiClient {
+public class OCSAPIClientImpl extends AbstractApiClient implements ApiClient {
 
     private final DioritAPISourceConfiguration apiSourceConfiguration
              = new DioritAPISourceConfiguration(
@@ -171,17 +171,5 @@ public class OCSAPIClientImpl extends AbstractApiClient implements OCSApiClient 
                 .block();
         System.out.println("Response: " + responseFlux);
         return responseFlux;
-    }
-
-    @Override
-    public List<OCSCategory> getAll() {
-        List<OCSCategory> response = webClient.get()
-                .uri("/catalog/categories")
-                .header(apiSourceConfiguration.tokenHeaderKey(), apiSourceConfiguration.token())
-                .accept(MediaType.APPLICATION_JSON)
-                .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<List<OCSCategory>>() {})
-                .block();
-        return response;
     }
 }
