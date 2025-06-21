@@ -3,6 +3,7 @@ package org.slavik;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -18,12 +19,18 @@ public class ConnectionManager {
         this.password = password;
     }
 
-    public void connection() throws SQLException {
-        con = new DriverManagerDataSource();
-        con.setDriverClassName("com.mysql.cj.jdbc.Driver");
-        con.setUrl(url);
-        con.setUsername(user);
-        con.setPassword(password);
+    public DataSource connection() throws SQLException {
+        DriverManagerDataSource dataSource = new DriverManagerDataSource();
+        dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
+        dataSource.setUrl(url);
+        dataSource.setUsername(user);
+        dataSource.setPassword(password);
+
+        // Сохраняем созданный DataSource в поле класса
+        this.con = dataSource;
+
+        // Возвращаем DataSource
+        return dataSource;
     }
 
     public Connection getConnection() throws SQLException {

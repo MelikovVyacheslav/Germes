@@ -5,7 +5,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slavik.DioritB2B.DioritAPIClientImpl;
 import org.slavik.DioritB2B.DioritAPISourceConfiguration;
 import org.slavik.DioritB2B.model.Datum;
+import org.slavik.repository.JdbcProductDescriptionRepository;
+import org.slavik.repository.JdbcProductRepository;
+import org.slavik.service.DioritProductService;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
+import javax.sql.DataSource;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -34,13 +40,20 @@ public class Main {
                 "root",
                 "221633"
         );
-        connectionManager.connection();
+        DataSource dataSource = connectionManager.connection();
 
         DioritAPIClientImpl dioritAPIClient = new DioritAPIClientImpl(webClientConfiguration.dioritWebClient());
-        List<Datum> datumList = dioritAPIClient.getAllProduct();
-        for (Datum datum : datumList) {
-            System.out.println(datum.getName());
-        }
+//        List<Datum> datumList = dioritAPIClient.getAllProduct();
+//        for (Datum datum : datumList) {
+//            System.out.println(datum.getName());
+//        }
 
+        DioritProductService dioritProductService
+                = new DioritProductService(
+                dioritAPIClient,
+                new JdbcProductDescriptionRepository(new NamedParameterJdbcTemplate(dataSource)),
+                new JdbcProductRepository(new NamedParameterJdbcTemplate(dataSource))
+                );
+        dioritProductService.sync();
     }
 }

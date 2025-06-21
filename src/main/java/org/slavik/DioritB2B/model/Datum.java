@@ -2,7 +2,6 @@ package org.slavik.DioritB2B.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import com.fasterxml.jackson.annotation.*;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -18,8 +17,8 @@ public class Datum {
     private String mainPhoto100;
     private String mainPhoto200;
     private List<String> photos;
-    private long stock;
-    private long price;
+    private int stock;
+    private int price;
 
     @JsonProperty("id")
     public UUID getID() { return id; }
@@ -72,13 +71,41 @@ public class Datum {
     public void setPhotos(List<String> value) { this.photos = value; }
 
     @JsonProperty("stock")
-    public long getStock() { return stock; }
+    public int getStock() { return stock; }
     @JsonProperty("stock")
-    public void setStock(long value) { this.stock = value; }
+    public void setStock(int value) { this.stock = value; }
 
     @JsonProperty("price")
-    public long getPrice() { return price; }
+    public int getPrice() { return price; }
     @JsonProperty("price")
-    public void setPrice(long value) { this.price = value; }
+    public void setPrice(int value) { this.price = value; }
+
+    public Double getHeight() {
+        return extractDimension("Высота (см)");
+    }
+
+    public Double getWeight() {
+        return extractDimension("Вес (кг)");
+    }
+
+    public Double getWidth() {
+        return extractDimension("Ширина (см)");
+    }
+
+    public Double getLength() {
+        return extractDimension("Глубина (см)");
+    }
+
+    private Double extractDimension(String attributeName) {
+        if (attributes == null) return null;
+
+        for (Map<String, Attribute> attributeGroup : attributes) {
+            Attribute attr = attributeGroup.get(attributeName);
+            if (attr != null) {
+                return attr.doubleValue != null ? attr.doubleValue : null;
+            }
+        }
+        return null;
+    }
 }
 

@@ -81,9 +81,9 @@ public class DioritAPIClientImpl extends AbstractApiClient implements DioritApiC
     @Override
     public List<Datum> getAllProduct() {
         List<Datum> response = new ArrayList<>();
-        for (int i = 1; i <= 36; i++) {
+        for (int i = 1; i <= 2; i++) {
             DioritProductResponse productResponse = webClient.get()
-                    .uri(apiSourceConfiguration.baseUrl() + "/api/products?page=" + i)
+                    .uri(apiSourceConfiguration.baseUrl() + "/api/products?page=" + i + "&per_page=500")
                     .header(apiSourceConfiguration.tokenHeaderKey(), apiSourceConfiguration.token())
                     .accept(MediaType.APPLICATION_JSON)
                     .retrieve()
