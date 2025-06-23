@@ -83,7 +83,7 @@ public class Product {
     }
 
     public String getImage() {
-        return convertImageUrlToPath(image);
+        return image;
     }
 
     public int getManufacturerId() {
