@@ -14,19 +14,27 @@ public class JdbcProductDescriptionRepository implements ProductDescriptionRepos
         this.jdbcOperations = jdbcOperations;
     }
 
+    private final String TAG_VALUE = "";
+    private final String DESCRIPTION_VALUE = "";
+    private final String META_KEYWORD_VALUE = "";
+    private final int LANGUAGE_ID_VALUE = 1;
     @Override
     public ProductDescription create(ProductDescription product) {
         String sql = """
-                INSERT INTO oc_product_description(productId,name,description) VALUES
-                    (:productId,:name,:description);
+                INSERT INTO oc_product_description(product_id, language_id, name, description, tag, meta_title,
+                meta_description, meta_keyword, meta_h1) VALUES
+                    (:productId, :languageId, :name, :description, :tag, :name, :name, :meta_keyword, :name);
                 
                 """;
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("productId", product.getProductId());
         params.addValue("name", product.getName());
-        params.addValue("description", product.getDescription());
-        ProductDescription createProductDescription = jdbcOperations.queryForObject(sql, params, new ProductDescription.Mapper());
-        return createProductDescription;
+        params.addValue("languageId", LANGUAGE_ID_VALUE);
+        params.addValue("description", DESCRIPTION_VALUE);
+        params.addValue("tag", TAG_VALUE);
+        params.addValue("meta_keyword", META_KEYWORD_VALUE);
+        jdbcOperations.update(sql, params);
+        return product;
     }
 
     @Override
@@ -45,7 +53,7 @@ public class JdbcProductDescriptionRepository implements ProductDescriptionRepos
     @Override
     public List<ProductDescription> findAll() {
         String sql = """
-                Select * FROM oc_product_description
+                SELECT * FROM oc_product_description
                 """;
         List<ProductDescription> products = jdbcOperations.query(sql, new ProductDescription.Mapper());
         return products;
@@ -69,16 +77,26 @@ public class JdbcProductDescriptionRepository implements ProductDescriptionRepos
     public ProductDescription update(ProductDescription product) {
         String sql = """
                 UPDATE oc_product_description SET
-                    name = :name,
-                    description = :description
+                product_id = :productId,
+                language_id = :languageId,
+                name = :name,
+                description = :description,
+                tag = :tag,
+                meta_title  = :name,
+                meta_description  = :name,
+                meta_keyword = :meta_keyword,
+                meta_h1 = :name
                 WHERE product_id = :productId;
                 """;
 
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("productId", product.getProductId());
         params.addValue("name", product.getName());
-        params.addValue("description", product.getDescription());
-        ProductDescription productDescriptionUpdate = jdbcOperations.queryForObject(sql, params, new ProductDescription.Mapper());
-        return productDescriptionUpdate;
+        params.addValue("languageId", LANGUAGE_ID_VALUE);
+        params.addValue("description", DESCRIPTION_VALUE);
+        params.addValue("tag", TAG_VALUE);
+        params.addValue("meta_keyword", META_KEYWORD_VALUE);
+        jdbcOperations.update(sql, params);
+        return product;
     }
 }

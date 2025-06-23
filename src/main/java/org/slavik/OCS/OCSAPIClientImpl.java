@@ -180,18 +180,37 @@ public class OCSAPIClientImpl extends AbstractApiClient implements ApiClient, OC
     @Override
     public List<OCSProduct> getAll() {
         List<OCSProduct> products = new ArrayList<>();
-        OCSProductResponse productResponse = webClient.get()
-                .uri(apiSourceConfiguration.baseUrl() + "/catalog/categories/V02/products") // Уточните endpoint
-                .header(apiSourceConfiguration.tokenHeaderKey(), apiSourceConfiguration.token())
-                .accept(MediaType.APPLICATION_JSON)
-                .retrieve()
-                .bodyToMono(OCSProductResponse.class)
-                .block();
 
-            for (Result result : productResponse.getResult()) {
-                products.add(result.getProduct());
+        try {
+            String url = apiSourceConfiguration.baseUrl() + "/catalog/categories/batch/products";
 
+            String jsonResponse = webClient.get()
+                    .uri(url)
+                    .header(apiSourceConfiguration.tokenHeaderKey(), apiSourceConfiguration.token())
+                    .accept(MediaType.APPLICATION_JSON)
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block();
+
+            if (jsonResponse == null || jsonResponse.isEmpty()) {
+                System.out.println("Пустой ответ от API.");
+                return products;
+            }
+
+            ObjectMapper mapper = new ObjectMapper();
+            OCSProductResponse response = mapper.readValue(jsonResponse, OCSProductResponse.class);
+            if (response.getResult() != null) {
+                for (Result res : response.getResult()) {
+                    if (res.getProduct() != null) {
+                        products.add(res.getProduct());
+                    }
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+
         return products;
     }
 

@@ -6,6 +6,7 @@ import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Date;
 
 public class Product {
     private final int productId;
@@ -17,23 +18,23 @@ public class Product {
     private final String image;
     private final int manufacturerId;
     private final int price;
-    private final String dateAvailable;
-    private final int weight;
+    private final Date dateAvailable;
+    private final Double weight;
     private final int weightClassId;
-    private final int length;
-    private final int width;
-    private final int height;
+    private final Double length;
+    private final Double width;
+    private final Double height;
     private final int lengthClassId;
     private final int subtract;
     private final int status;
-    private final String dateAdded;
-    private final String dateModify;
+    private final Date dateAdded;
+    private final Date dateModified;
     private final int dnId;
 
     public Product(int productId, String model, String sku, String ean, int quantity, int stockStatusId,
-                   String image, int manufacturerId, int price, String dateAvailable, int weight,
-                   int weightClassId, int length, int wight, int height, int lengthClassId, int subtract,
-                   int status, String dateAdded, String dateModify, int dnId) {
+                   String image, int manufacturerId, int price, String dateAvailable, Double weight,
+                   int weightClassId, Double length, Double wight, Double height, int lengthClassId, int subtract,
+                   int status, String dateAdded, String dateModified, int dnId) {
         this.productId = productId;
         this.model = model;
         this.sku = sku;
@@ -53,7 +54,7 @@ public class Product {
         this.subtract = subtract;
         this.status = status;
         this.dateAdded = dateAdded;
-        this.dateModify = dateModify;
+        this.dateModified = dateModified;
         this.dnId = dnId;
     }
 
@@ -82,7 +83,7 @@ public class Product {
     }
 
     public String getImage() {
-        return image;
+        return convertImageUrlToPath(image);
     }
 
     public int getManufacturerId() {
@@ -93,11 +94,14 @@ public class Product {
         return price;
     }
 
-    public String getDateAvailable() {
+    public Date getDateAvailable() {
         return dateAvailable;
     }
 
-    public int getWeight() {
+    public double getWeight() {
+        if (weight == null) {
+            return 0;
+        }
         return weight;
     }
 
@@ -105,15 +109,24 @@ public class Product {
         return weightClassId;
     }
 
-    public int getLength() {
+    public double getLength() {
+        if (length == null) {
+            return 0;
+        }
         return length;
     }
 
-    public int getWidth() {
+    public double getWidth() {
+        if (width == null) {
+            return 0;
+        }
         return width;
     }
 
-    public int getHeight() {
+    public double getHeight() {
+        if (height == null) {
+            return 0;
+        }
         return height;
     }
 
@@ -129,16 +142,21 @@ public class Product {
         return status;
     }
 
-    public String getDateAdded() {
+    public Date getDateAdded() {
         return dateAdded;
     }
 
-    public String getDateModify() {
-        return dateModify;
+    public Date getDateModified() {
+        return dateModified;
     }
 
     public int getDnId() {
         return dnId;
+    }
+
+    public String convertImageUrlToPath(String originalUrl) {
+        String fileName = originalUrl.substring(originalUrl.lastIndexOf('/') + 1);
+        return "catalog/b2b/" + fileName;
     }
 
     public static class Mapper implements RowMapper<Product> {
@@ -154,17 +172,17 @@ public class Product {
             String image = rs.getString("image");
             int manufacturerId = rs.getInt("manufacturer_id");
             int price = rs.getInt("price");
-            String dateAvailable = rs.getString("date_available");
-            int weight = rs.getInt("weight");
+            Date dateAvailable = rs.getDate("date_available");
+            Double weight = rs.getDouble("weight");
             int weightClassId = rs.getInt("weigh_clas_id");
-            int length = rs.getInt("length");
-            int wight = rs.getInt("wight");
-            int height = rs.getInt("height");
+            Double length = rs.getDouble("length");
+            Double wight = rs.getDouble("wight");
+            Double height = rs.getDouble("height");
             int lengthClassId = rs.getInt("length_class_id");
             int subtract = rs.getInt("subtract");
             int status = rs.getInt("status");
-            String dateAdded = rs.getString("date_added");
-            String dateModify = rs.getString("date_modify");
+            Date dateAdded = rs.getDate("date_added");
+            Date dateModify = rs.getDate("date_modify");
             int dnId = rs.getInt("dn_id");
             return new Product(
                 productId,

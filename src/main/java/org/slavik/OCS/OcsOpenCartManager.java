@@ -24,7 +24,7 @@ public class OcsOpenCartManager {
         }
 
         for (JsonNode node : root) {
-            Product product = parseProduct(node);
+          Product product = parseProduct(node);
             saveProductToDB(product);
         }
     }
@@ -41,11 +41,11 @@ public class OcsOpenCartManager {
                 node.path("manufacturer_id").asInt(),
                 node.path("price").asInt(),
                 node.path("date_available").asText(),
-                node.path("weight").asInt(),
+                node.path("weight").asDouble(),
                 node.path("weight_class_id").asInt(),
-                node.path("length").asInt(),
-                node.path("wight").asInt(),
-                node.path("height").asInt(),
+                node.path("length").asDouble(),
+                node.path("wight").asDouble(),
+                node.path("height").asDouble(),
                 node.path("length_class_id").asInt(),
                 node.path("subtract").asInt(),
                 node.path("status").asInt(),
@@ -96,17 +96,17 @@ public class OcsOpenCartManager {
             stmt.setString(7, product.getImage());
             stmt.setInt(8, product.getManufacturerId());
             stmt.setInt(9, product.getPrice());
-            stmt.setString(10, product.getDateAvailable());
-            stmt.setInt(11, product.getWeight());
+            stmt.setDate(10, product.getDateAvailable());
+            stmt.setDouble(11, product.getWeight());
             stmt.setInt(12, product.getWeightClassId());
-            stmt.setInt(13, product.getLength());
-            stmt.setInt(14, product.getWidth());
-            stmt.setInt(15, product.getHeight());
+            stmt.setDouble(13, product.getLength());
+            stmt.setDouble(14, product.getWidth());
+            stmt.setDouble(15, product.getHeight());
             stmt.setInt(16, product.getLengthClassId());
             stmt.setInt(17, product.getSubtract());
             stmt.setInt(18, product.getStatus());
-            stmt.setString(19, product.getDateAdded());
-            stmt.setString(20, product.getDateModify());
+            stmt.setDate(19, product.getDateAdded());
+            stmt.setDate(20, product.getDateModified());
             stmt.setInt(21, product.getDnId());
 
             stmt.executeUpdate();

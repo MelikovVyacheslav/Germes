@@ -1,5 +1,6 @@
 package org.slavik.repository;
 
+import org.slavik.DioritB2B.model.Datum;
 import org.slavik.entity.product.Product;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
@@ -14,30 +15,50 @@ public class JdbcProductRepository implements ProductRepository {
         this.jdbcOperations = jdbcOperations;
     }
 
+    private final String UPC_VALUE = "";
+    private final String JAN_VALUE = "";
+    private final String ISBN_VALUE = "";
+    private final String MPN_VALUE = "";
+    private final String LOCATION_VALUE = "";
+    private final String VIDEO_VALUE = "";
+    private final int COST_VALUE = 0;
+    private final int POINTS_VALUE = 0;
+    private final int TAX_CLASS_ID_VALUE = 0;
+    private final String SUPPLIER_VALUE = "";
     @Override
     public Product create(Product product) {
         String sql = """
                 INSERT INTO oc_product (
-                    product_id, model, sku, ean, quantity, stock_status_id, image, manufacturer_id,
-                    price, date_available, weight, weight_class_id, length, width, height,
-                    length_class_id, subtract, status, date_added, date_modify, dn_id
+                    model, sku, upc, ean, jan, isbn, mpn, location, quantity, stock_status_id, image, video,
+                    manufacturer_id, price, cost, points, tax_class_id,
+                    date_available, weight, weight_class_id, length, width, height,
+                    length_class_id, subtract, status, date_added, date_modified, dn_id, supplier
                 ) VALUES (
-                    :productId, :model, :sku, :ean, :quantity, :stockStatusId, :image, :manufacturerId,
-                    :price, :dateAvailable, :weight, :weightClassId, :length, :width, :height,
-                    :lengthClassId, :subtract, :status, :dateAdded, :dateModify, :dnId
+                    :model, :sku, :upc, :ean, :jan, :isbn, :mpn, :location, :quantity, :stockStatusId, :image,
+                    :video, :manufacturerId, :price, :cost, :points, :tax_class_id,
+                    :dateAvailable, :weight, :weightClassId, :length, :width,
+                    :height, :lengthClassId, :subtract, :status, :dateAdded, :dateModified, :dnId, :supplier
                 );
                 """;
 
         MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("productId", product.getProductId());
         params.addValue("model", product.getModel());
         params.addValue("sku", product.getSku());
+        params.addValue("upc", UPC_VALUE);
         params.addValue("ean", product.getEan());
+        params.addValue("jan", JAN_VALUE);
+        params.addValue("isbn", ISBN_VALUE);
+        params.addValue("mpn", MPN_VALUE);
+        params.addValue("location", LOCATION_VALUE);
         params.addValue("quantity", product.getQuantity());
         params.addValue("stockStatusId", product.getStockStatusId());
         params.addValue("image", product.getImage());
+        params.addValue("video", VIDEO_VALUE);
         params.addValue("manufacturerId", product.getManufacturerId());
         params.addValue("price", product.getPrice());
+        params.addValue("cost", COST_VALUE);
+        params.addValue("points", POINTS_VALUE);
+        params.addValue("tax_class_id", TAX_CLASS_ID_VALUE);
         params.addValue("dateAvailable", product.getDateAvailable());
         params.addValue("weight", product.getWeight());
         params.addValue("weightClassId", product.getWeightClassId());
@@ -48,11 +69,48 @@ public class JdbcProductRepository implements ProductRepository {
         params.addValue("subtract", product.getSubtract());
         params.addValue("status", product.getStatus());
         params.addValue("dateAdded", product.getDateAdded());
-        params.addValue("dateModify", product.getDateModify());
+        params.addValue("dateModified", product.getDateModified());
         params.addValue("dnId", product.getDnId());
-Product createdProduct = jdbcOperations.queryForObject(sql, params, new Product.Mapper());
+        params.addValue("supplier", SUPPLIER_VALUE);
+        jdbcOperations.update(sql, params);
 
-        return createdProduct;
+        return product;
+    }
+
+    public void createProductImage(Datum productAPI, int productId) {
+        String sql = """
+                insert into oc_product_image(product_id, image, sort_order) values
+                (:productId, :image, :sortOrder);
+                """;
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("productId", productId);
+        params.addValue("image", productAPI.getMainPhoto());
+        params.addValue("sortOrder", 1);
+        jdbcOperations.update(sql, params);
+        sql = """
+                insert into oc_product_image(product_id, image, sort_order) values
+                (:productId, :image, :sortOrder);
+                """;
+        params.addValue("productId", productId);
+        params.addValue("image", productAPI.getMainPhoto50());
+        params.addValue("sortOrder", 2);
+        jdbcOperations.update(sql, params);
+        sql = """
+                insert into oc_product_image(product_id, image, sort_order) values
+                (:productId, :image, :sortOrder);
+                """;
+        params.addValue("productId", productId);
+        params.addValue("image", productAPI.getMainPhoto100());
+        params.addValue("sortOrder", 3);
+        jdbcOperations.update(sql, params);
+        sql = """
+                insert into oc_product_image(product_id, image, sort_order) values
+                (:productId, :image, :sortOrder);
+                """;
+        params.addValue("productId", productId);
+        params.addValue("image", productAPI.getMainPhoto200());
+        params.addValue("sortOrder", 4);
+        jdbcOperations.update(sql, params);
     }
 
     @Override
@@ -93,29 +151,27 @@ Product createdProduct = jdbcOperations.queryForObject(sql, params, new Product.
     @Override
     public Product update(Product product) {
         String sql = """
-            UPDATE oc_product SET
-                model = :model,
-                sku = :sku,
-                ean = :ean,
-                quantity = :quantity,
-                stock_status_id = :stockStatusId,
-                image = :image,
-                manufacturer_id = :manufacturerId,
-                price = :price,
-                date_available = :dateAvailable,
-                weight = :weight,
-                weight_class_id = :weightClassId,
-                length = :length,
-                width = :width,
-                height = :height,
-                length_class_id = :lengthClassId,
-                subtract = :subtract,
-                status = :status,
-                date_added = :dateAdded,
-                date_modify = :dateModify,
-                dn_id = :dnId
-            WHERE product_id = :productId;
-            """;
+                UPDATE oc_product SET
+                    model = :model,
+                    sku = :sku,
+                    ean = :ean,
+                    quantity = :quantity,
+                    stock_status_id = :stockStatusId,
+                    image = :image,
+                    manufacturer_id = :manufacturerId,
+                    price = :price,
+                    weight = :weight,
+                    weight_class_id = :weightClassId,
+                    length = :length,
+                    width = :width,
+                    height = :height,
+                    length_class_id = :lengthClassId,
+                    subtract = :subtract,
+                    status = :status,
+                    date_modified = :dateModify,
+                    dn_id = :dnId
+                WHERE product_id = :productId;
+                """;
 
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("productId", product.getProductId());
@@ -127,7 +183,6 @@ Product createdProduct = jdbcOperations.queryForObject(sql, params, new Product.
         params.addValue("image", product.getImage());
         params.addValue("manufacturerId", product.getManufacturerId());
         params.addValue("price", product.getPrice());
-        params.addValue("dateAvailable", product.getDateAvailable());
         params.addValue("weight", product.getWeight());
         params.addValue("weightClassId", product.getWeightClassId());
         params.addValue("length", product.getLength());
@@ -136,13 +191,16 @@ Product createdProduct = jdbcOperations.queryForObject(sql, params, new Product.
         params.addValue("lengthClassId", product.getLengthClassId());
         params.addValue("subtract", product.getSubtract());
         params.addValue("status", product.getStatus());
-        params.addValue("dateAdded", product.getDateAdded());
-        params.addValue("dateModify", product.getDateModify());
+        params.addValue("dateModify", product.getDateModified());
         params.addValue("dnId", product.getDnId());
 
-        Product productUpdate = jdbcOperations.queryForObject(sql, params, new Product.Mapper());
+        jdbcOperations.update(sql, params);
 
-        return productUpdate;
+        return product;
     }
 
+    public Integer gettingProductIdForNewProduct() {
+        String sql = "select max(product_id) from oc_product";
+        return jdbcOperations.queryForObject(sql, new MapSqlParameterSource(), Integer.class) + 1;
+    }
 }
