@@ -30,6 +30,7 @@ public class DioritProductService implements ProductService {
     private final int LENGTH_CLASS_ID = 0;
     private final int STATUS_VALUE = 6;
     private final int DN_ID = 0;
+    private final int STOCK_STATUS = 6;
 
     @Override
     public void sync() {
@@ -85,7 +86,7 @@ public class DioritProductService implements ProductService {
                         productAPI.getSku(),
                         "dioritb2b",
                         productAPI.getStock(),
-                        6,
+                        STOCK_STATUS,
                         productAPI.getMainPhoto(),
                         MANUFACTURER_ID,
                         productAPI.getPrice(),
