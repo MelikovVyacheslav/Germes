@@ -39,7 +39,7 @@ public class DioritProductService implements ProductService {
             }
             if (!isThereProduct) {
                 Product newProduct = jdbcProductRepository.create(productAPI);
-                jdbcProductDescriptionRepository.create();
+               ///// jdbcProductDescriptionRepository.create();
             }
         }
     }

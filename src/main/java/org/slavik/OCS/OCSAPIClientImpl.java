@@ -5,16 +5,20 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slavik.AbstractApiClient;
 import org.slavik.ApiClient;
 import org.slavik.DioritB2B.DioritAPISourceConfiguration;
+import org.slavik.OCS.model.OCSProduct;
+import org.slavik.OCS.model.OCSProductResponse;
+import org.slavik.OCS.model.Result;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class OCSAPIClientImpl extends AbstractApiClient implements ApiClient {
+public class OCSAPIClientImpl extends AbstractApiClient implements ApiClient, OCSApiClient {
 
     private final DioritAPISourceConfiguration apiSourceConfiguration
-             = new DioritAPISourceConfiguration(
+            = new DioritAPISourceConfiguration(
             "https://connector.b2b.ocs.ru/api/v2",
             "TSWJXggwvt59l9nuYVvtSM?iyea0DR",
             "X-API-Key",
@@ -172,4 +176,24 @@ public class OCSAPIClientImpl extends AbstractApiClient implements ApiClient {
         System.out.println("Response: " + responseFlux);
         return responseFlux;
     }
+
+    @Override
+    public List<OCSProduct> getAll() {
+        List<OCSProduct> products = new ArrayList<>();
+        OCSProductResponse productResponse = webClient.get()
+                .uri(apiSourceConfiguration.baseUrl() + "/catalog/categories/V02/products") // Уточните endpoint
+                .header(apiSourceConfiguration.tokenHeaderKey(), apiSourceConfiguration.token())
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToMono(OCSProductResponse.class)
+                .block();
+
+            for (Result result : productResponse.getResult()) {
+                products.add(result.getProduct());
+
+        }
+        return products;
+    }
+
+
 }

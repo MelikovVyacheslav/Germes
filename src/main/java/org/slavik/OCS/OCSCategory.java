@@ -1,9 +1,12 @@
 package org.slavik.OCS;
 
 import com.fasterxml.jackson.annotation.*;
+import org.slavik.entity.product.Product;
+
 import java.util.List;
 
 public class OCSCategory {
+    private List<Product> products;
     private String category;
     private String name;
     private List<OCSCategory> children;
@@ -22,4 +25,11 @@ public class OCSCategory {
     public List<OCSCategory> getChildren() { return children; }
     @JsonProperty("children")
     public void setChildren(List<OCSCategory> value) { this.children = value; }
+
+    public void setProducts(List<Product> products) {
+    }
+
+    public List<Product> getProducts() {
+        return products;
+    }
 }

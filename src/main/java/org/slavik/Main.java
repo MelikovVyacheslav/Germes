@@ -4,8 +4,11 @@ package org.slavik;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slavik.DioritB2B.DioritAPIClientImpl;
 import org.slavik.DioritB2B.DioritAPISourceConfiguration;
+import org.slavik.OCS.OCSAPIClientImpl;
+import org.slavik.OCS.model.OCSProduct;
 
 import java.sql.SQLException;
+import java.util.List;
 
 public class Main {
     public static void main(String[] args) throws InterruptedException, JsonProcessingException, SQLException {
@@ -37,9 +40,13 @@ public class Main {
         );
         connectionManager.connection();
 
-        DioritAPIClientImpl dioritAPIClient = new DioritAPIClientImpl(webClientConfiguration.dioritWebClient());
-        dioritAPIClient.getAllProduct();
-
+//        DioritAPIClientImpl dioritAPIClient = new DioritAPIClientImpl(webClientConfiguration.dioritWebClient());
+//        dioritAPIClient.getAllProduct();
+        OCSAPIClientImpl ocsapiClient = new OCSAPIClientImpl(webClientConfiguration.ocsWebClient());
+        List<OCSProduct> products = ocsapiClient.getAll();
+        for (OCSProduct product : products) {
+            System.out.println(product.getItemName());
+        }
 //        DioritAPIClientImpl dioritApiClient
 //                = new DioritAPIClientImpl(webClientConfiguration.dioritWebClient());
 //
