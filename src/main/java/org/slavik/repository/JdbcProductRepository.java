@@ -1,5 +1,6 @@
 package org.slavik.repository;
 
+import org.slavik.DioritB2B.model.Datum;
 import org.slavik.entity.product.Product;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
@@ -76,6 +77,42 @@ public class JdbcProductRepository implements ProductRepository {
         return product;
     }
 
+    public void createProductImage(Datum productAPI, int productId) {
+        String sql = """
+                insert into oc_product_image(product_id, image, sort_order) values
+                (:productId, :image, :sortOrder);
+                """;
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("productId", productId);
+        params.addValue("image", productAPI.getMainPhoto());
+        params.addValue("sortOrder", 1);
+        jdbcOperations.update(sql, params);
+        sql = """
+                insert into oc_product_image(product_id, image, sort_order) values
+                (:productId, :image, :sortOrder);
+                """;
+        params.addValue("productId", productId);
+        params.addValue("image", productAPI.getMainPhoto50());
+        params.addValue("sortOrder", 2);
+        jdbcOperations.update(sql, params);
+        sql = """
+                insert into oc_product_image(product_id, image, sort_order) values
+                (:productId, :image, :sortOrder);
+                """;
+        params.addValue("productId", productId);
+        params.addValue("image", productAPI.getMainPhoto100());
+        params.addValue("sortOrder", 3);
+        jdbcOperations.update(sql, params);
+        sql = """
+                insert into oc_product_image(product_id, image, sort_order) values
+                (:productId, :image, :sortOrder);
+                """;
+        params.addValue("productId", productId);
+        params.addValue("image", productAPI.getMainPhoto200());
+        params.addValue("sortOrder", 4);
+        jdbcOperations.update(sql, params);
+    }
+
     @Override
     public Product find(int id) {
         String sql = """
@@ -123,7 +160,6 @@ public class JdbcProductRepository implements ProductRepository {
                     image = :image,
                     manufacturer_id = :manufacturerId,
                     price = :price,
-                    date_available = :dateAvailable,
                     weight = :weight,
                     weight_class_id = :weightClassId,
                     length = :length,
@@ -132,8 +168,7 @@ public class JdbcProductRepository implements ProductRepository {
                     length_class_id = :lengthClassId,
                     subtract = :subtract,
                     status = :status,
-                    date_added = :dateAdded,
-                    date_modify = :dateModify,
+                    date_modified = :dateModify,
                     dn_id = :dnId
                 WHERE product_id = :productId;
                 """;
@@ -148,7 +183,6 @@ public class JdbcProductRepository implements ProductRepository {
         params.addValue("image", product.getImage());
         params.addValue("manufacturerId", product.getManufacturerId());
         params.addValue("price", product.getPrice());
-        params.addValue("dateAvailable", product.getDateAvailable());
         params.addValue("weight", product.getWeight());
         params.addValue("weightClassId", product.getWeightClassId());
         params.addValue("length", product.getLength());
@@ -157,13 +191,12 @@ public class JdbcProductRepository implements ProductRepository {
         params.addValue("lengthClassId", product.getLengthClassId());
         params.addValue("subtract", product.getSubtract());
         params.addValue("status", product.getStatus());
-        params.addValue("dateAdded", product.getDateAdded());
         params.addValue("dateModify", product.getDateModified());
         params.addValue("dnId", product.getDnId());
 
-        Product productUpdate = jdbcOperations.queryForObject(sql, params, new Product.Mapper());
+        jdbcOperations.update(sql, params);
 
-        return productUpdate;
+        return product;
     }
 
     public Integer gettingProductIdForNewProduct() {

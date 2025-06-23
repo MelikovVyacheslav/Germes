@@ -36,9 +36,9 @@ public class Main {
                 );
 
         ConnectionManager connectionManager = new ConnectionManager(
-                "jdbc:mysql://localhost:3306/u3045843_default?useUnicode=true&characterEncoding=UTF-8",
-                "root",
-                "221633"
+                "jdbc:mysql://80.78.252.245:3310/u3045843_default",
+                "u3045843_default",
+                "jAzDURqgdt3K940E"
         );
         DataSource dataSource = connectionManager.connection();
 

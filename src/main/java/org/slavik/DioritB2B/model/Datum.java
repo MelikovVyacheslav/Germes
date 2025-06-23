@@ -65,6 +65,11 @@ public class Datum {
     @JsonProperty("main_photo_200")
     public void setMainPhoto200(String value) { this.mainPhoto200 = value; }
 
+    public String convertImageUrlToPath(String originalUrl) {
+        String fileName = originalUrl.substring(originalUrl.lastIndexOf('/') + 1);
+        return "catalog/b2b/" + fileName;
+    }
+
     @JsonProperty("photos")
     public List<String> getPhotos() { return photos; }
     @JsonProperty("photos")
