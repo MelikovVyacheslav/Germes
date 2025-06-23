@@ -168,21 +168,21 @@ public class Product {
             String sku = rs.getString("sku");
             String ean = rs.getString("ean");
             int quantity = rs.getInt("quantity");
-            int stockStatusId = rs.getInt("stockStatusId");
+            int stockStatusId = rs.getInt("stock_status_id");
             String image = rs.getString("image");
             int manufacturerId = rs.getInt("manufacturer_id");
             int price = rs.getInt("price");
             Date dateAvailable = rs.getDate("date_available");
             Double weight = rs.getDouble("weight");
-            int weightClassId = rs.getInt("weigh_clas_id");
+            int weightClassId = rs.getInt("weight_class_id");
             Double length = rs.getDouble("length");
-            Double wight = rs.getDouble("wight");
+            Double wight = rs.getDouble("width");
             Double height = rs.getDouble("height");
             int lengthClassId = rs.getInt("length_class_id");
             int subtract = rs.getInt("subtract");
             int status = rs.getInt("status");
             Date dateAdded = rs.getDate("date_added");
-            Date dateModify = rs.getDate("date_modify");
+            Date dateModify = rs.getDate("date_modified");
             int dnId = rs.getInt("dn_id");
             return new Product(
                 productId,

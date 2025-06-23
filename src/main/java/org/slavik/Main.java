@@ -7,6 +7,7 @@ import org.slavik.DioritB2B.DioritAPISourceConfiguration;
 import org.slavik.DioritB2B.model.Datum;
 import org.slavik.repository.JdbcProductDescriptionRepository;
 import org.slavik.repository.JdbcProductRepository;
+import org.slavik.repository.JdbcProductToCategory;
 import org.slavik.service.DioritProductService;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -52,8 +53,10 @@ public class Main {
                 = new DioritProductService(
                 dioritAPIClient,
                 new JdbcProductDescriptionRepository(new NamedParameterJdbcTemplate(dataSource)),
-                new JdbcProductRepository(new NamedParameterJdbcTemplate(dataSource))
+                new JdbcProductRepository(new NamedParameterJdbcTemplate(dataSource)),
+                new JdbcProductToCategory(new NamedParameterJdbcTemplate(dataSource))
                 );
-        dioritProductService.sync();
+//        dioritProductService.sync();
+        dioritProductService.syncTableProductToCategory();
     }
 }

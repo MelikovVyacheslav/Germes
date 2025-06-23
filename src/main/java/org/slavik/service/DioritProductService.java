@@ -4,8 +4,11 @@ import org.slavik.DioritB2B.DioritAPIClientImpl;
 import org.slavik.DioritB2B.model.Datum;
 import org.slavik.entity.product.Product;
 import org.slavik.entity.product.ProductDescription;
+import org.slavik.entity.product.ProductToCategory;
 import org.slavik.repository.JdbcProductDescriptionRepository;
 import org.slavik.repository.JdbcProductRepository;
+import org.slavik.repository.JdbcProductToCategory;
+import org.slavik.repository.ProductToCategoryRepository;
 
 import java.sql.Date;
 import java.util.List;
@@ -15,13 +18,15 @@ public class DioritProductService implements ProductService {
     private final DioritAPIClientImpl apiClient;
     private final JdbcProductDescriptionRepository jdbcProductDescriptionRepository;
     private final JdbcProductRepository jdbcProductRepository;
+    private final JdbcProductToCategory jdbcProductToCategory;
 
     public DioritProductService(DioritAPIClientImpl apiClient,
                                 JdbcProductDescriptionRepository jdbcProductDescriptionRepository,
-                                JdbcProductRepository jdbcProductRepository) {
+                                JdbcProductRepository jdbcProductRepository, JdbcProductToCategory jdbcProductToCategory) {
         this.apiClient = apiClient;
         this.jdbcProductDescriptionRepository = jdbcProductDescriptionRepository;
         this.jdbcProductRepository = jdbcProductRepository;
+        this.jdbcProductToCategory = jdbcProductToCategory;
     }
 
     private final int MANUFACTURER_ID = 1;
@@ -31,6 +36,7 @@ public class DioritProductService implements ProductService {
     private final int STATUS_VALUE = 6;
     private final int DN_ID = 0;
     private final int STOCK_STATUS = 6;
+    private final double PERCENT_VALUE = 20;
 
     @Override
     public void sync() {
@@ -58,7 +64,7 @@ public class DioritProductService implements ProductService {
                         6,
                         productAPI.getMainPhoto(),
                         MANUFACTURER_ID,
-                        productAPI.getPrice(),
+                        calculationOfNewPrice(productAPI.getPrice()),
                         CURRENT_DATE,
                         productAPI.getWeight(),
                         WEIGHT_CLASS_ID,
@@ -89,7 +95,7 @@ public class DioritProductService implements ProductService {
                         STOCK_STATUS,
                         productAPI.getMainPhoto(),
                         MANUFACTURER_ID,
-                        productAPI.getPrice(),
+                        calculationOfNewPrice(productAPI.getPrice()),
                         CURRENT_DATE,
                         productAPI.getWeight(),
                         WEIGHT_CLASS_ID,
@@ -110,5 +116,22 @@ public class DioritProductService implements ProductService {
                 ));
             }
         }
+    }
+
+    public void syncTableProductToCategory() {
+        List<Product> allProduct = jdbcProductRepository.findAll();
+        List<ProductToCategory> allProductToCategory = jdbcProductToCategory.findAll();
+        for (Product product : allProduct) {
+            if (product.getEan().equals("dioritb2b")) {
+                jdbcProductToCategory.create(new ProductToCategory(
+                        product.getProductId(),
+                        2012
+                ));
+            }
+        }
+    }
+
+    private int calculationOfNewPrice(int price) {
+        return (int) (price + ((price * PERCENT_VALUE) /100));
     }
 }
