@@ -1,13 +1,10 @@
 package org.slavik.DioritB2B;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import org.slavik.AbstractApiClient;
-import org.slavik.DioritB2B.model.Datum;
-import org.slavik.DioritB2B.model.DioritCategory;
+import org.slavik.DioritB2B.model.Brand;
+import org.slavik.DioritB2B.model.DioritProduct;
+import org.slavik.DioritB2B.model.ShortProduct;
 import org.slavik.DioritB2B.model.DioritProductResponse;
-import org.slavik.entity.product.Product;
-import org.slavik.entity.product.ProductDescription;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -15,6 +12,7 @@ import reactor.core.publisher.Mono;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class DioritAPIClientImpl extends AbstractApiClient implements DioritApiClient {
 
@@ -53,34 +51,21 @@ public class DioritAPIClientImpl extends AbstractApiClient implements DioritApiC
         return responseFlux;
     }
 
-    public String viewProduct(String productId) {
-        String responseFlux = webClient.get()
+    public DioritProduct viewProduct(UUID productId) {
+        DioritProduct response = webClient.get()
                 .uri(apiSourceConfiguration.baseUrl() + "/api/products/" + productId)
                 .header(apiSourceConfiguration.tokenHeaderKey(), apiSourceConfiguration.token())
                 .accept(MediaType.APPLICATION_JSON)
                 .acceptCharset(StandardCharsets.UTF_8)
                 .retrieve()
-                .onStatus((code) -> {
-                    if (code.is4xxClientError() || code.is5xxServerError()) {
-                        System.out.println("Failed with code:" + code.value());
-                        return false;
-                    }
-                    if (code.is2xxSuccessful()) return true;
-                    System.out.println("Not 2xx and not 4xx, 5xx way.");
-                    return false;
-                }, (response) -> {
-                    System.out.println(response);
-                    return Mono.empty();
-                })
-                .bodyToMono(String.class)
+                .bodyToMono(DioritProduct.class)
                 .block();
-        System.out.println("Response: " + responseFlux);
-        return responseFlux;
+        return response;
     }
 
     @Override
-    public List<Datum> getAllProduct() {
-        List<Datum> response = new ArrayList<>();
+    public List<ShortProduct> getAllProduct() {
+        List<ShortProduct> response = new ArrayList<>();
         for (int i = 1; i <= 2; i++) {
             DioritProductResponse productResponse = webClient.get()
                     .uri(apiSourceConfiguration.baseUrl() + "/api/products?page=" + i + "&per_page=500")
@@ -89,9 +74,11 @@ public class DioritAPIClientImpl extends AbstractApiClient implements DioritApiC
                     .retrieve()
                     .bodyToMono(DioritProductResponse.class)
                     .block();
-                response.addAll(productResponse.getData());
+            response.addAll(productResponse.getData());
         }
         return response;
     }
+
+//    public List<Brand> getAll
 
 }

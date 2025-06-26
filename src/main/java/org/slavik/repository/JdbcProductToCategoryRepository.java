@@ -6,10 +6,10 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 
 import java.util.List;
 
-public class JdbcProductToCategory implements ProductToCategoryRepository {
+public class JdbcProductToCategoryRepository implements ProductToCategoryRepository {
     private final NamedParameterJdbcOperations jdbcOperations;
 
-    public JdbcProductToCategory(NamedParameterJdbcOperations jdbcOperations) {
+    public JdbcProductToCategoryRepository(NamedParameterJdbcOperations jdbcOperations) {
         this.jdbcOperations = jdbcOperations;
     }
 

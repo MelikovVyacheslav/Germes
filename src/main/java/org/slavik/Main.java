@@ -1,22 +1,15 @@
 package org.slavik;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slavik.DioritB2B.DioritAPIClientImpl;
 import org.slavik.DioritB2B.DioritAPISourceConfiguration;
-import org.slavik.DioritB2B.model.Datum;
-import org.slavik.repository.JdbcProductDescriptionRepository;
-import org.slavik.repository.JdbcProductRepository;
-import org.slavik.repository.JdbcProductToCategory;
+import org.slavik.repository.*;
 import org.slavik.service.DioritProductService;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import javax.sql.DataSource;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class Main {
     public static void main(String[] args) throws InterruptedException, IOException, SQLException {
@@ -54,9 +47,12 @@ public class Main {
                 dioritAPIClient,
                 new JdbcProductDescriptionRepository(new NamedParameterJdbcTemplate(dataSource)),
                 new JdbcProductRepository(new NamedParameterJdbcTemplate(dataSource)),
-                new JdbcProductToCategory(new NamedParameterJdbcTemplate(dataSource))
+                new JdbcProductToCategoryRepository(new NamedParameterJdbcTemplate(dataSource)),
+                new JdbcManufacturerRepository(new NamedParameterJdbcTemplate(dataSource)),
+                new JdbcProductToStoreRepository(new NamedParameterJdbcTemplate(dataSource)),
+                new JdbcProductToLayoutRepository(new NamedParameterJdbcTemplate(dataSource))
                 );
-//        dioritProductService.sync();
-        dioritProductService.syncTableProductToCategory();
+        dioritProductService.sync();
+
     }
 }

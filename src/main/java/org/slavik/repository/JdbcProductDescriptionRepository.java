@@ -24,7 +24,6 @@ public class JdbcProductDescriptionRepository implements ProductDescriptionRepos
                 INSERT INTO oc_product_description(product_id, language_id, name, description, tag, meta_title,
                 meta_description, meta_keyword, meta_h1) VALUES
                     (:productId, :languageId, :name, :description, :tag, :name, :name, :meta_keyword, :name);
-                
                 """;
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("productId", product.getProductId());
