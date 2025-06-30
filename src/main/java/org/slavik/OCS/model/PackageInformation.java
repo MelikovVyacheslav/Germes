@@ -13,82 +13,44 @@ public class PackageInformation {
     private String units;
 
     @JsonProperty("weight")
-    public double getWeight() {
-        return weight;
-    }
-
+    public double getWeight() { return weight; }
     @JsonProperty("weight")
-    public void setWeight(double value) {
-        this.weight = value;
-    }
+    public void setWeight(double value) { this.weight = value; }
 
     @JsonProperty("width")
-    public double getWidth() {
-        return width;
-    }
-
+    public double getWidth() { return width; }
     @JsonProperty("width")
-    public void setWidth(double value) {
-        this.width = value;
-    }
+    public void setWidth(double value) { this.width = value; }
 
     @JsonProperty("height")
-    public double getHeight() {
-        return height;
-    }
-
+    public double getHeight() { return height; }
     @JsonProperty("height")
-    public void setHeight(double value) {
-        this.height = value;
-    }
+    public void setHeight(double value) { this.height = value; }
 
     @JsonProperty("depth")
-    public double getDepth() {
-        return depth;
-    }
-
+    public double getDepth() { return depth; }
     @JsonProperty("depth")
-    public void setDepth(double value) {
-        this.depth = value;
-    }
+    public void setDepth(double value) { this.depth = value; }
 
     @JsonProperty("volume")
-    public double getVolume() {
-        return volume;
-    }
-
+    public double getVolume() { return volume; }
     @JsonProperty("volume")
-    public void setVolume(double value) {
-        this.volume = value;
-    }
+    public void setVolume(double value) { this.volume = value; }
 
     @JsonProperty("minOrderQuantity")
-    public long getMinOrderQuantity() {
-        return minOrderQuantity;
-    }
-
+    public long getMinOrderQuantity() { return minOrderQuantity; }
     @JsonProperty("minOrderQuantity")
-    public void setMinOrderQuantity(long value) {
-        this.minOrderQuantity = value;
-    }
+    public void setMinOrderQuantity(long value) { this.minOrderQuantity = value; }
 
     @JsonProperty("multiplicity")
-    public long getMultiplicity() {
-        return multiplicity;
-    }
-
+    public long getMultiplicity() { return multiplicity; }
     @JsonProperty("multiplicity")
-    public void setMultiplicity(long value) {
-        this.multiplicity = value;
-    }
+    public void setMultiplicity(long value) { this.multiplicity = value; }
 
     @JsonProperty("units")
-    public String getUnits() {
-        return units;
-    }
-
+    public String getUnits() { return units; }
     @JsonProperty("units")
-    public void setUnits(String value) {
-        this.units = value;
-    }
+    public void setUnits(String value) { this.units = value; }
 }
+
+

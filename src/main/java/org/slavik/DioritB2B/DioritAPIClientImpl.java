@@ -1,9 +1,13 @@
 package org.slavik.DioritB2B;
 
 import org.slavik.AbstractApiClient;
+<<<<<<< Updated upstream
 import org.slavik.DioritB2B.model.Brand;
 import org.slavik.DioritB2B.model.DioritProduct;
 import org.slavik.DioritB2B.model.ShortProduct;
+=======
+import org.slavik.DioritB2B.model.Datum;
+>>>>>>> Stashed changes
 import org.slavik.DioritB2B.model.DioritProductResponse;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;

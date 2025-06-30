@@ -5,9 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slavik.AbstractApiClient;
 import org.slavik.ApiClient;
 import org.slavik.DioritB2B.DioritAPISourceConfiguration;
-import org.slavik.OCS.model.OCSProduct;
-import org.slavik.OCS.model.OCSProductResponse;
-import org.slavik.OCS.model.Result;
+import org.slavik.OCS.model.*;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -16,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class OCSAPIClientImpl extends AbstractApiClient implements ApiClient, OCSApiClient {
+
 
     private final DioritAPISourceConfiguration apiSourceConfiguration
             = new DioritAPISourceConfiguration(
@@ -79,6 +78,7 @@ public class OCSAPIClientImpl extends AbstractApiClient implements ApiClient, OC
                 .bodyToMono(String.class)
                 .block();
         System.out.println("Response: " + responseFlux);
+
         return responseFlux;
     }
 
@@ -178,11 +178,11 @@ public class OCSAPIClientImpl extends AbstractApiClient implements ApiClient, OC
     }
 
     @Override
-    public List<OCSProduct> getAll() {
-        List<OCSProduct> products = new ArrayList<>();
+    public List<Result> getAll() {
+        List<Result> products = new ArrayList<>();
 
         try {
-            String url = apiSourceConfiguration.baseUrl() + "/catalog/categories/batch/products";
+            String url = apiSourceConfiguration.baseUrl() + "/catalog/categories/all/products";
 
             String jsonResponse = webClient.get()
                     .uri(url)
@@ -196,17 +196,11 @@ public class OCSAPIClientImpl extends AbstractApiClient implements ApiClient, OC
                 System.out.println("Пустой ответ от API.");
                 return products;
             }
-
             ObjectMapper mapper = new ObjectMapper();
             OCSProductResponse response = mapper.readValue(jsonResponse, OCSProductResponse.class);
             if (response.getResult() != null) {
-                for (Result res : response.getResult()) {
-                    if (res.getProduct() != null) {
-                        products.add(res.getProduct());
-                    }
-                }
+                products = response.getResult();
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }

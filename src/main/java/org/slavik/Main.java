@@ -5,12 +5,22 @@ import org.slavik.DioritB2B.DioritAPIClientImpl;
 import org.slavik.DioritB2B.DioritAPISourceConfiguration;
 <<<<<<< HEAD
 import org.slavik.OCS.OCSAPIClientImpl;
+<<<<<<< Updated upstream
 =======
 import org.slavik.repository.*;
 import org.slavik.service.DioritProductService;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 >>>>>>> f12d2b8978d5ca5d16d766e4ea360f7fd86137d3
+=======
+import org.slavik.entity.product.Product;
+import org.slavik.repository.JdbcProductDescriptionRepository;
+import org.slavik.repository.JdbcProductRepository;
+import org.slavik.service.OcsProductService;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+>>>>>>> Stashed changes
 
+import javax.sql.DataSource;
 import java.sql.SQLException;
 
 public class Main {
@@ -37,13 +47,30 @@ public class Main {
 //        JdbcCategoryRepository jdbcCategoryRepository = new JdbcCategoryRepository()
 //        System.out.println();
         ConnectionManager connectionManager = new ConnectionManager(
-                "jdbc:mysql://80.78.252.245:3310/u3045843_default",
-                "u3045843_default",
-                "jAzDURqgdt3K940E"
+                "jdbc:mysql://localhost:3306/Test_db",
+                "root",
+                "12345678"
         );
-//        connectionManager.connection();
-        OCSAPIClientImpl ocsapiClient = new OCSAPIClientImpl(webClientConfiguration.ocsWebClient());
-        ocsapiClient.viewProduct("1000816535");
+//
+
+        DataSource dataSource = connectionManager.connection();
+        NamedParameterJdbcOperations jdbcOperations = new NamedParameterJdbcTemplate(dataSource);
+        OCSAPIClientImpl apiClient = new OCSAPIClientImpl(webClientConfiguration.ocsWebClient());
+        JdbcProductDescriptionRepository descriptionRepo = new JdbcProductDescriptionRepository(jdbcOperations);
+        JdbcProductRepository productRepo = new JdbcProductRepository(jdbcOperations);
+        OcsProductService ocsProductService = new OcsProductService(apiClient,descriptionRepo,productRepo);
+        ocsProductService.sync();
+
+
+
+
+
+
+
+
+/////OcsProductService ocsProductService = new OcsProductService(webClientConfiguration.ocsWebClient(), )
+//        OCSAPIClientImpl ocsapiClient = new OCSAPIClientImpl(webClientConfiguration.ocsWebClient());
+//        ocsapiClient.viewProduct("1000816535");
 
 //        DioritAPIClientImpl dioritAPIClient = new DioritAPIClientImpl(webClientConfiguration.dioritWebClient());
 //        dioritAPIClient.getAllProduct();

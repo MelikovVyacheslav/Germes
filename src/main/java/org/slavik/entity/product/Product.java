@@ -2,6 +2,7 @@ package org.slavik.entity.product;
 
 import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.Nullable;
+import org.slavik.OCS.model.Price;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;
@@ -32,9 +33,9 @@ public class Product {
     private final int dnId;
 
     public Product(int productId, String model, String sku, String ean, int quantity, int stockStatusId,
-                   String image, int manufacturerId, int price, String dateAvailable, Double weight,
+                   String image, int manufacturerId, int price, Date dateAvailable, Double weight,
                    int weightClassId, Double length, Double wight, Double height, int lengthClassId, int subtract,
-                   int status, String dateAdded, String dateModified, int dnId) {
+                   int status, Date dateAdded, Date dateModified, int dnId) {
         this.productId = productId;
         this.model = model;
         this.sku = sku;
@@ -57,6 +58,7 @@ public class Product {
         this.dateModified = dateModified;
         this.dnId = dnId;
     }
+
 
     public int getProductId() {
         return productId;
@@ -90,7 +92,7 @@ public class Product {
         return manufacturerId;
     }
 
-    public int getPrice() {
+    public double getPrice() {
         return price;
     }
 

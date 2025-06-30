@@ -1,13 +1,14 @@
 package org.slavik.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import org.slavik.DioritB2B.DioritAPIClientImpl;
+
 import org.slavik.OCS.OCSAPIClientImpl;
+import org.slavik.OCS.model.*;
 import org.slavik.entity.product.Product;
 import org.slavik.entity.product.ProductDescription;
 import org.slavik.repository.JdbcProductDescriptionRepository;
 import org.slavik.repository.JdbcProductRepository;
 
+import java.sql.Date;
 import java.util.List;
 
 public class OcsProductService implements ProductService {
@@ -18,13 +19,25 @@ public class OcsProductService implements ProductService {
     public OcsProductService(OCSAPIClientImpl apiClient,
                              JdbcProductDescriptionRepository jdbcProductDescriptionRepository,
                              JdbcProductRepository jdbcProductRepository) {
+
         this.apiClient = apiClient;
         this.jdbcProductDescriptionRepository = jdbcProductDescriptionRepository;
         this.jdbcProductRepository = jdbcProductRepository;
     }
 
+    private final int MANUFACTURER_ID = 1;
+    private final Date CURRENT_DATE = new Date(System.currentTimeMillis());
+    private final int WEIGHT_CLASS_ID = 0;
+    private final int LENGTH_CLASS_ID = 0;
+    private final int STATUS_VALUE = 6;
+    private final int DN_ID = 0;
+
     @Override
+<<<<<<< Updated upstream
     public void sync() throws JsonProcessingException {
+=======
+    public void sync() {
+>>>>>>> Stashed changes
         List<Result> allProductAPI = apiClient.getAll();
         List<ProductDescription> allProductDescriptionDataBase = jdbcProductDescriptionRepository.findAll();
         boolean isThereProduct;

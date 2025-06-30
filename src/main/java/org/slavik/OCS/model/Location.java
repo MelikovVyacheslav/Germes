@@ -1,6 +1,5 @@
 package org.slavik.OCS.model;
 
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Location {
@@ -9,6 +8,36 @@ public class Location {
     private String type;
     private Quantity quantity;
     private boolean canReserve;
+    private String deliveryDate; // Или Date, если хочешь парсить дату
+    private String arrivalDate; // или другой нужный тип (например, LocalDateTime)
+    private String departureDate; // или LocalDateTime, если используешь дату
+
+    @JsonProperty("departureDate")
+    public String getDepartureDate() {
+        return departureDate;
+    }
+    @JsonProperty("departureDate")
+    public void setDepartureDate(String departureDate) {
+        this.departureDate = departureDate;
+    }
+
+    @JsonProperty("arrivalDate")
+    public String getArrivalDate() {
+        return arrivalDate;
+    }
+    @JsonProperty("arrivalDate")
+    public void setArrivalDate(String arrivalDate) {
+        this.arrivalDate = arrivalDate;
+    }
+
+    @JsonProperty("deliveryDate")
+    public String getDeliveryDate() {
+        return deliveryDate;
+    }
+    @JsonProperty("deliveryDate")
+    public void setDeliveryDate(String deliveryDate) {
+        this.deliveryDate = deliveryDate;
+    }
 
     @JsonProperty("location")
     public String getLocation() {

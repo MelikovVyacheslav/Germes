@@ -23,37 +23,37 @@ public class OcsOpenCartManager {
             throw new IllegalArgumentException("Ожидается JSON-массив.");
         }
 
-        for (JsonNode node : root) {
-          Product product = parseProduct(node);
-            saveProductToDB(product);
-        }
+//        for (JsonNode node : root) {
+//          Product product = parseProduct(node);
+//            saveProductToDB(product);
+//        }
     }
 
-    private Product parseProduct(JsonNode node) {
-        return new Product(
-                node.path("product_id").asInt(),
-                node.path("model").asText(),
-                node.path("sku").asText(),
-                node.path("ean").asText(),
-                node.path("quantity").asInt(),
-                node.path("stock_status_id").asInt(),
-                node.path("image").asText(),
-                node.path("manufacturer_id").asInt(),
-                node.path("price").asInt(),
-                node.path("date_available").asText(),
-                node.path("weight").asDouble(),
-                node.path("weight_class_id").asInt(),
-                node.path("length").asDouble(),
-                node.path("wight").asDouble(),
-                node.path("height").asDouble(),
-                node.path("length_class_id").asInt(),
-                node.path("subtract").asInt(),
-                node.path("status").asInt(),
-                node.path("date_added").asText(),
-                node.path("date_modify").asText(),
-                node.path("dn_id").asInt()
-        );
-    }
+//    private Product parseProduct(JsonNode node) {
+//        return new Product(
+//                node.path("product_id").asInt(),
+//                node.path("model").asText(),
+//                node.path("sku").asText(),
+//                node.path("ean").asText(),
+//                node.path("quantity").asInt(),
+//                node.path("stock_status_id").asInt(),
+//                node.path("image").asText(),
+//                node.path("manufacturer_id").asInt(),
+//                node.path("price").asInt(),
+//                node.path("date_available").asText(),
+//                node.path("weight").asDouble(),
+//                node.path("weight_class_id").asInt(),
+//                node.path("length").asDouble(),
+//                node.path("wight").asDouble(),
+//                node.path("height").asDouble(),
+//                node.path("length_class_id").asInt(),
+//                node.path("subtract").asInt(),
+//                node.path("status").asInt(),
+//                node.path("date_added").asText(),
+//                node.path("date_modify").asText(),
+//                node.path("dn_id").asInt()
+//        );
+//    }
 
     private void saveProductToDB(Product product) throws SQLException {
         String sql = """
@@ -95,7 +95,7 @@ public class OcsOpenCartManager {
             stmt.setInt(6, product.getStockStatusId());
             stmt.setString(7, product.getImage());
             stmt.setInt(8, product.getManufacturerId());
-            stmt.setInt(9, product.getPrice());
+            stmt.setDouble(9, product.getPrice());
             stmt.setDate(10, product.getDateAvailable());
             stmt.setDouble(11, product.getWeight());
             stmt.setInt(12, product.getWeightClassId());
