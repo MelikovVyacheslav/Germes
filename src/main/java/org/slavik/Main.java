@@ -1,10 +1,15 @@
 package org.slavik;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slavik.DioritB2B.DioritAPIClientImpl;
 import org.slavik.DioritB2B.DioritAPISourceConfiguration;
+<<<<<<< HEAD
 import org.slavik.OCS.OCSAPIClientImpl;
+=======
+import org.slavik.repository.*;
+import org.slavik.service.DioritProductService;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+>>>>>>> f12d2b8978d5ca5d16d766e4ea360f7fd86137d3
 
 import java.sql.SQLException;
 
@@ -43,11 +48,26 @@ public class Main {
 //        DioritAPIClientImpl dioritAPIClient = new DioritAPIClientImpl(webClientConfiguration.dioritWebClient());
 //        dioritAPIClient.getAllProduct();
 
+<<<<<<< HEAD
 //        DioritAPIClientImpl dioritApiClient
 //                = new DioritAPIClientImpl(webClientConfiguration.dioritWebClient());
 //
 //        DioritOpenCartManager dioritOpenCartManager =
 //                new DioritOpenCartManager(connectionManager.getConnection(), dioritApiClient);
 //        dioritOpenCartManager.addAllNewProducts();
+=======
+        DioritProductService dioritProductService
+                = new DioritProductService(
+                dioritAPIClient,
+                new JdbcProductDescriptionRepository(new NamedParameterJdbcTemplate(dataSource)),
+                new JdbcProductRepository(new NamedParameterJdbcTemplate(dataSource)),
+                new JdbcProductToCategoryRepository(new NamedParameterJdbcTemplate(dataSource)),
+                new JdbcManufacturerRepository(new NamedParameterJdbcTemplate(dataSource)),
+                new JdbcProductToStoreRepository(new NamedParameterJdbcTemplate(dataSource)),
+                new JdbcProductToLayoutRepository(new NamedParameterJdbcTemplate(dataSource))
+                );
+        dioritProductService.sync();
+
+>>>>>>> f12d2b8978d5ca5d16d766e4ea360f7fd86137d3
     }
 }
