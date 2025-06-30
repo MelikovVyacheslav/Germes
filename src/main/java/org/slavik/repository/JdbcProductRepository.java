@@ -1,7 +1,8 @@
 package org.slavik.repository;
 
-import org.slavik.DioritB2B.model.Datum;
+import org.slavik.DioritB2B.model.ShortProduct;
 import org.slavik.entity.product.Product;
+import org.slavik.entity.product.ProductDescription;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 
@@ -73,17 +74,17 @@ public class JdbcProductRepository implements ProductRepository {
         params.addValue("dnId", product.getDnId());
         params.addValue("supplier", SUPPLIER_VALUE);
         jdbcOperations.update(sql, params);
-
-        return product;
+        Product newProduct = findBySku(product.getSku());
+        return newProduct;
     }
 
-    public void createProductImage(Datum productAPI, int productId) {
+    public void createProductImage(ShortProduct productAPI, Product product) {
         String sql = """
                 insert into oc_product_image(product_id, image, sort_order) values
                 (:productId, :image, :sortOrder);
                 """;
         MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("productId", productId);
+        params.addValue("productId", product.getProductId());
         params.addValue("image", productAPI.getMainPhoto());
         params.addValue("sortOrder", 1);
         jdbcOperations.update(sql, params);
@@ -91,7 +92,7 @@ public class JdbcProductRepository implements ProductRepository {
                 insert into oc_product_image(product_id, image, sort_order) values
                 (:productId, :image, :sortOrder);
                 """;
-        params.addValue("productId", productId);
+        params.addValue("productId", product.getProductId());
         params.addValue("image", productAPI.getMainPhoto50());
         params.addValue("sortOrder", 2);
         jdbcOperations.update(sql, params);
@@ -99,7 +100,7 @@ public class JdbcProductRepository implements ProductRepository {
                 insert into oc_product_image(product_id, image, sort_order) values
                 (:productId, :image, :sortOrder);
                 """;
-        params.addValue("productId", productId);
+        params.addValue("productId", product.getProductId());
         params.addValue("image", productAPI.getMainPhoto100());
         params.addValue("sortOrder", 3);
         jdbcOperations.update(sql, params);
@@ -107,11 +108,23 @@ public class JdbcProductRepository implements ProductRepository {
                 insert into oc_product_image(product_id, image, sort_order) values
                 (:productId, :image, :sortOrder);
                 """;
-        params.addValue("productId", productId);
+        params.addValue("productId", product.getProductId());
         params.addValue("image", productAPI.getMainPhoto200());
         params.addValue("sortOrder", 4);
         jdbcOperations.update(sql, params);
     }
+
+    private Product findBySku(String sku) {
+        String sql = """
+                select * from oc_product
+                where sku = :sku;
+                """;
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("sku", sku);
+        Product product = jdbcOperations.queryForObject(sql, params, new Product.Mapper());
+        return product;
+    }
+
 
     @Override
     public Product find(int id) {

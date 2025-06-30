@@ -1,29 +1,42 @@
 package org.slavik.DioritB2B.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
+import com.fasterxml.jackson.annotation.*;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-public class Datum {
+public class DioritProduct {
     private UUID id;
+    private Brand brand;
+    private Brand catalog;
     private String sku;
     private String name;
-    private String description;
+    private Object description;
     private List<Map<String, Attribute>> attributes;
     private String mainPhoto;
     private String mainPhoto50;
     private String mainPhoto100;
     private String mainPhoto200;
     private List<String> photos;
-    private int stock;
-    private int price;
+    private long stock;
+    private long price;
+
+    private final double PERCENT_VALUE = 20;
 
     @JsonProperty("id")
     public UUID getID() { return id; }
     @JsonProperty("id")
     public void setID(UUID value) { this.id = value; }
+
+    @JsonProperty("brand")
+    public Brand getBrand() { return brand; }
+    @JsonProperty("brand")
+    public void setBrand(Brand value) { this.brand = value; }
+
+    @JsonProperty("catalog")
+    public Brand getCatalog() { return catalog; }
+    @JsonProperty("catalog")
+    public void setCatalog(Brand value) { this.catalog = value; }
 
     @JsonProperty("sku")
     public String getSku() { return sku; }
@@ -36,9 +49,9 @@ public class Datum {
     public void setName(String value) { this.name = value; }
 
     @JsonProperty("description")
-    public String getDescription() { return description; }
+    public Object getDescription() { return description; }
     @JsonProperty("description")
-    public void setDescription(String value) { this.description = value; }
+    public void setDescription(Object value) { this.description = value; }
 
     @JsonProperty("attributes")
     public List<Map<String, Attribute>> getAttributes() { return attributes; }
@@ -65,41 +78,20 @@ public class Datum {
     @JsonProperty("main_photo_200")
     public void setMainPhoto200(String value) { this.mainPhoto200 = value; }
 
-    public String convertImageUrlToPath(String originalUrl) {
-        String fileName = originalUrl.substring(originalUrl.lastIndexOf('/') + 1);
-        return "catalog/b2b/" + fileName;
-    }
-
     @JsonProperty("photos")
     public List<String> getPhotos() { return photos; }
     @JsonProperty("photos")
     public void setPhotos(List<String> value) { this.photos = value; }
 
     @JsonProperty("stock")
-    public int getStock() { return stock; }
+    public long getStock() { return stock; }
     @JsonProperty("stock")
-    public void setStock(int value) { this.stock = value; }
+    public void setStock(long value) { this.stock = value; }
 
     @JsonProperty("price")
-    public int getPrice() { return price; }
+    public long getPrice() { return (int) (price + ((price * PERCENT_VALUE) / 100)); }
     @JsonProperty("price")
     public void setPrice(int value) { this.price = value; }
-
-    public Double getHeight() {
-        return extractDimension("Высота (см)");
-    }
-
-    public Double getWeight() {
-        return extractDimension("Вес (кг)");
-    }
-
-    public Double getWidth() {
-        return extractDimension("Ширина (см)");
-    }
-
-    public Double getLength() {
-        return extractDimension("Глубина (см)");
-    }
 
     private Double extractDimension(String attributeName) {
         if (attributes == null) return null;
@@ -112,10 +104,4 @@ public class Datum {
         }
         return null;
     }
-
-
-    public int getProductId() {
-        return 0;
-    }
 }
-
