@@ -1,4 +1,4 @@
-package org.slavik.repository;
+package org.slavik.repository.manufacturer;
 
 import org.slavik.entity.manufacturer.Manufacturer;
 import org.springframework.dao.EmptyResultDataAccessException;

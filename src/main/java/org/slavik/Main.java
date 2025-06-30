@@ -3,7 +3,13 @@ package org.slavik;
 
 import org.slavik.DioritB2B.DioritAPIClientImpl;
 import org.slavik.DioritB2B.DioritAPISourceConfiguration;
-import org.slavik.repository.*;
+import org.slavik.repository.attribute.JdbcAttributeDescriptionRepository;
+import org.slavik.repository.attribute.JdbcAttributeRepository;
+import org.slavik.repository.manufacturer.JdbcManufacturerRepository;
+import org.slavik.repository.product.JdbcProductAttributeRepository;
+import org.slavik.repository.product.JdbcProductDescriptionRepository;
+import org.slavik.repository.product.JdbcProductRepository;
+import org.slavik.repository.product.JdbcProductToCategoryRepository;
 import org.slavik.service.DioritProductService;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
@@ -49,8 +55,9 @@ public class Main {
                 new JdbcProductRepository(new NamedParameterJdbcTemplate(dataSource)),
                 new JdbcProductToCategoryRepository(new NamedParameterJdbcTemplate(dataSource)),
                 new JdbcManufacturerRepository(new NamedParameterJdbcTemplate(dataSource)),
-                new JdbcProductToStoreRepository(new NamedParameterJdbcTemplate(dataSource)),
-                new JdbcProductToLayoutRepository(new NamedParameterJdbcTemplate(dataSource))
+                new JdbcAttributeRepository(new NamedParameterJdbcTemplate(dataSource)),
+                new JdbcAttributeDescriptionRepository(new NamedParameterJdbcTemplate(dataSource)),
+                new JdbcProductAttributeRepository(new NamedParameterJdbcTemplate(dataSource))
                 );
         dioritProductService.sync();
 

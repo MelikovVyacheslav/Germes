@@ -1,4 +1,4 @@
-package org.slavik.repository;
+package org.slavik.repository.category;
 
 import org.slavik.entity.category.Category;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;

@@ -154,11 +154,6 @@ public class Product {
         return dnId;
     }
 
-    public String convertImageUrlToPath(String originalUrl) {
-        String fileName = originalUrl.substring(originalUrl.lastIndexOf('/') + 1);
-        return "catalog/b2b/" + fileName;
-    }
-
     public static class Mapper implements RowMapper<Product> {
 
         @Override

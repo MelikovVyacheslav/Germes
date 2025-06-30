@@ -1,8 +1,7 @@
-package org.slavik.repository;
+package org.slavik.repository.product;
 
 import org.slavik.DioritB2B.model.ShortProduct;
 import org.slavik.entity.product.Product;
-import org.slavik.entity.product.ProductDescription;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 

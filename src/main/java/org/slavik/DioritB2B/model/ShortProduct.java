@@ -2,6 +2,7 @@ package org.slavik.DioritB2B.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -98,9 +99,34 @@ public class ShortProduct {
         return extractDimension("Глубина (см)");
     }
 
+    public static Map<String, Object> extractAttributesExceptGroup(ShortProduct product) {
+        Map<String, Object> result = new HashMap<>();
+
+        if (product.getAttributes() == null) {
+            return result;
+        }
+
+        for (Map<String, Attribute> attributeGroup : product.getAttributes()) {
+            for (Map.Entry<String, Attribute> entry : attributeGroup.entrySet()) {
+                String attributeName = entry.getKey();
+                Attribute attribute = entry.getValue();
+                if ("Группа".equals(attributeName)) {
+                    continue;
+                }
+                if (attribute.doubleValue != null) {
+                    result.put(attributeName, attribute.doubleValue);
+                } else if (attribute.stringValue != null) {
+                    result.put(attributeName, attribute.stringValue);
+                }
+            }
+        }
+
+        return result;
+    }
+
+
     private Double extractDimension(String attributeName) {
         if (attributes == null) return null;
-
         for (Map<String, Attribute> attributeGroup : attributes) {
             Attribute attr = attributeGroup.get(attributeName);
             if (attr != null) {

@@ -1,4 +1,4 @@
-package org.slavik.repository;
+package org.slavik.repository.product;
 
 import org.slavik.entity.product.ProductDescription;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -52,7 +52,8 @@ public class JdbcProductDescriptionRepository implements ProductDescriptionRepos
     @Override
     public List<ProductDescription> findAll() {
         String sql = """
-                SELECT * FROM oc_product_description
+                SELECT opd.product_id, opd.name, opd.description FROM oc_product op, oc_product_description opd
+                WHERE op.ean = 'dioritb2b' AND op.product_id = opd.product_id;
                 """;
         List<ProductDescription> products = jdbcOperations.query(sql, new ProductDescription.Mapper());
         return products;
