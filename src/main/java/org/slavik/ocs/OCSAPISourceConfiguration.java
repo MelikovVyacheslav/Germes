@@ -1,6 +1,5 @@
-package org.slavik.OCS;
+package org.slavik.ocs;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration

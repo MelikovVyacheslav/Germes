@@ -28,6 +28,7 @@ dependencies {
     implementation("org.springframework:spring-webflux:$springVersion")
     implementation("mysql:mysql-connector-java:8.0.33")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    implementation("com.github.mwiede:jsch:0.2.11")
 }
 
 test {

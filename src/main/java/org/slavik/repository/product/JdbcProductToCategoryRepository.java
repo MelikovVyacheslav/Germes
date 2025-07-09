@@ -23,6 +23,18 @@ public class JdbcProductToCategoryRepository implements ProductToCategoryReposit
     }
 
     @Override
+    public List<ProductToCategory> find(int productId) {
+        String sql = """
+                select * from oc_product_to_category
+                where product_id = :productId;
+                """;
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("productId", productId);
+        List<ProductToCategory> productToCategoryList = jdbcOperations.query(sql, params, new ProductToCategory.Mapper());
+        return productToCategoryList;
+    }
+
+    @Override
     public ProductToCategory create(ProductToCategory productToCategory) {
         String sql = """
                 insert into oc_product_to_category(product_id, category_id) values (

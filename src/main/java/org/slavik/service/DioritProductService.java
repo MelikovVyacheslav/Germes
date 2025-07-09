@@ -1,9 +1,12 @@
 
 package org.slavik.service;
 
-import org.slavik.DioritB2B.DioritAPIClientImpl;
-import org.slavik.DioritB2B.model.DioritProduct;
-import org.slavik.DioritB2B.model.ShortProduct;
+import com.jcraft.jsch.SftpException;
+import org.slavik.dioritB2B.DioritAPIClientImpl;
+import org.slavik.dioritB2B.model.DioritProduct;
+import org.slavik.dioritB2B.model.ShortProduct;
+import org.slavik.connector.JschSftpClient;
+import org.slavik.entity.attribute.Attribute;
 import org.slavik.entity.attribute.AttributeDescription;
 import org.slavik.entity.manufacturer.Manufacturer;
 import org.slavik.entity.product.*;
@@ -30,12 +33,16 @@ public class DioritProductService implements ProductService {
     private final JdbcAttributeRepository jdbcAttributeRepository;
     private final JdbcAttributeDescriptionRepository jdbcAttributeDescriptionRepository;
     private final JdbcProductAttributeRepository jdbcProductAttributeRepository;
+    private final JschSftpClient jschSftpClient;
 
     public DioritProductService(DioritAPIClientImpl apiClient,
                                 JdbcProductDescriptionRepository jdbcProductDescriptionRepository,
                                 JdbcProductRepository jdbcProductRepository,
                                 JdbcProductToCategoryRepository jdbcProductToCategory,
-                                JdbcManufacturerRepository jdbcManufacturerRepository, JdbcAttributeRepository jdbcAttributeRepository, JdbcAttributeDescriptionRepository jdbcAttributeDescriptionRepository, JdbcProductAttributeRepository jdbcProductAttributeRepository) {
+                                JdbcManufacturerRepository jdbcManufacturerRepository,
+                                JdbcAttributeRepository jdbcAttributeRepository,
+                                JdbcAttributeDescriptionRepository jdbcAttributeDescriptionRepository,
+                                JdbcProductAttributeRepository jdbcProductAttributeRepository, JschSftpClient jschSftpClient) {
         this.apiClient = apiClient;
         this.jdbcProductDescriptionRepository = jdbcProductDescriptionRepository;
         this.jdbcProductRepository = jdbcProductRepository;
@@ -44,9 +51,11 @@ public class DioritProductService implements ProductService {
         this.jdbcAttributeRepository = jdbcAttributeRepository;
         this.jdbcAttributeDescriptionRepository = jdbcAttributeDescriptionRepository;
         this.jdbcProductAttributeRepository = jdbcProductAttributeRepository;
+        this.jschSftpClient = jschSftpClient;
     }
 
     private final Date CURRENT_DATE = new Date(System.currentTimeMillis());
+    private final String EAN_VALUE = "dioritb2b";
     private final int WEIGHT_CLASS_ID = 0;
     private final int LENGTH_CLASS_ID = 0;
     private final int STATUS_VALUE = 1;
@@ -55,7 +64,7 @@ public class DioritProductService implements ProductService {
     private final int LANGUAGE_ID = 1;
 
     @Override
-    public void sync() {
+    public void sync() throws SftpException {
         List<ShortProduct> allProductAPI = apiClient.getAllProduct();
         List<ProductDescription> allProductDescriptionDataBase = jdbcProductDescriptionRepository.findAll();
         boolean isThereProduct;
@@ -71,12 +80,11 @@ public class DioritProductService implements ProductService {
             }
             if (isThereProduct) {
                 jdbcProductRepository.update(createProduct(productId, productAPI));
-                createAttribute(productAPI, productId);
                 System.out.println("Update " + productId);
             } else {
                 Product product = jdbcProductRepository.create(createProduct(0, productAPI));
                 jdbcProductDescriptionRepository.create(new ProductDescription(
-                        jdbcProductRepository.gettingProductIdForNewProduct(),
+                        product.getProductId(),
                         productAPI.getName(),
                         productAPI.getDescription()
                 ));
@@ -85,6 +93,7 @@ public class DioritProductService implements ProductService {
                         2012
                 ));
                 createAttribute(productAPI, product.getProductId());
+                addingAllPhotos(productAPI);
                 System.out.println("Create " + product.getProductId());
             }
         }
@@ -95,10 +104,10 @@ public class DioritProductService implements ProductService {
                 productId,
                 creatorOfSkuNumbers(product.getSku()),
                 creatorOfSkuNumbers(product.getSku()),
-                "dioritb2b",
+                EAN_VALUE,
                 product.getStock(),
                 STOCK_STATUS,
-                product.getMainPhoto(),
+                product.extractLastPartFromUrl(product.getPhotos().get(0)),
                 brandProductRatio(product.getID()),
                 product.getPrice(),
                 CURRENT_DATE,
@@ -116,6 +125,13 @@ public class DioritProductService implements ProductService {
         );
     }
 
+    private void addingAllPhotos(ShortProduct product) throws SftpException {
+        jschSftpClient.isConnected();
+        for (String photo : product.getPhotos()) {
+            jschSftpClient.downloadFile(product.extractLastPartFromUrl(photo), "sftp://u3045843@80.78.252.245/var/www/u3045843/data/www/germes.vip/image/catalog/b2b");
+        }
+    }
+
     private int brandProductRatio(UUID productId) {
         DioritProduct product = apiClient.viewProduct(productId);
         Manufacturer manufacturer = jdbcManufacturerRepository.find(product.getBrand().getName());
@@ -128,10 +144,6 @@ public class DioritProductService implements ProductService {
         return manufacturer.getManufacturerId();
     }
 
-    private String creatorOfSkuNumbers(String sku) {
-        return sku + "30";
-    }
-
     private void createAttribute(ShortProduct product, int productId) {
         Map<String, Object> attributeMap = product.extractAttributesExceptGroup(product);
         for (Map.Entry<String, Object> entry : attributeMap.entrySet()) {
@@ -140,7 +152,6 @@ public class DioritProductService implements ProductService {
 
             if (!attributeDescriptions.isEmpty()) {
                 AttributeDescription attributeDesc = attributeDescriptions.get(0);
-
                 jdbcProductAttributeRepository.create(new ProductAttribute(
                         productId,
                         attributeDesc.getAttributeId(),
@@ -148,9 +159,14 @@ public class DioritProductService implements ProductService {
                         entry.getValue().toString()
                 ));
             } else {
+                Attribute newAttribute = jdbcAttributeRepository.create(new Attribute(
+                        0,
+                        1,
+                        0
+                ));
                 AttributeDescription newAttributeDescription =
                         jdbcAttributeDescriptionRepository.create(new AttributeDescription(
-                                0,
+                                newAttribute.getAttributeId(),
                                 LANGUAGE_ID,
                                 entry.getKey()
                         ));
@@ -163,5 +179,9 @@ public class DioritProductService implements ProductService {
                 ));
             }
         }
+    }
+
+    private String creatorOfSkuNumbers(String sku) {
+        return sku + "30";
     }
 }

@@ -1,10 +1,10 @@
-package org.slavik.OCS;
+package org.slavik.ocs;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slavik.AbstractApiClient;
 import org.slavik.ApiClient;
-import org.slavik.DioritB2B.DioritAPISourceConfiguration;
+import org.slavik.dioritB2B.APISourceConfiguration;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -13,8 +13,8 @@ import java.util.List;
 
 public class OCSAPIClientImpl extends AbstractApiClient implements ApiClient {
 
-    private final DioritAPISourceConfiguration apiSourceConfiguration
-             = new DioritAPISourceConfiguration(
+    private final APISourceConfiguration apiSourceConfiguration
+             = new APISourceConfiguration(
             "https://connector.b2b.ocs.ru/api/v2",
             "TSWJXggwvt59l9nuYVvtSM?iyea0DR",
             "X-API-Key",

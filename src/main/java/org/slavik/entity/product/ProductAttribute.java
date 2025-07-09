@@ -2,14 +2,10 @@ package org.slavik.entity.product;
 
 import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.Nullable;
-import org.slavik.DioritB2B.model.Attribute;
-import org.slavik.DioritB2B.model.ShortProduct;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
 
 public class ProductAttribute {
 

@@ -1,4 +1,4 @@
-package org.slavik.DioritB2B;
+package org.slavik.dioritB2B;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;

@@ -1,4 +1,4 @@
-package org.slavik.DioritB2B.model;
+package org.slavik.dioritB2B.model;
 
 import com.fasterxml.jackson.annotation.*;
 

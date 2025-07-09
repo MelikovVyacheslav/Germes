@@ -1,4 +1,4 @@
-package org.slavik.OCS;
+package org.slavik.ocs;
 
 import org.slavik.ApiClient;
 

@@ -30,18 +30,23 @@ public class JdbcProductAttributeRepository implements ProductAttributeRepositor
     @Override
     public ProductAttribute find(ProductAttribute productAttribute) {
         String sql = """
-                select * from oc_product_attribute
-                where product_id = :productId and attribute_id = :attributeId;
-                """;
+            SELECT * FROM oc_product_attribute
+            WHERE product_id = :productId
+            AND attribute_id = :attributeId
+            AND language_id = :languageId""";
+
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("productId", productAttribute.getProductId());
         params.addValue("attributeId", productAttribute.getAttributeId());
-        ProductAttribute newProductAttribute = jdbcOperations.queryForObject(
+        params.addValue("languageId", productAttribute.getLanguageId());
+
+        List<ProductAttribute> results = jdbcOperations.query(
                 sql,
                 params,
                 new ProductAttribute.Mapper()
         );
-        return newProductAttribute;
+
+        return results.isEmpty() ? null : results.get(0);
     }
 
     @Override

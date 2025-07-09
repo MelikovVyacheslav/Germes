@@ -1,10 +1,9 @@
-package org.slavik.DioritB2B;
+package org.slavik.dioritB2B;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public record DioritAPISourceConfiguration (
+public record APISourceConfiguration(
         String baseUrl,
         String token,
         String tokenHeaderKey,

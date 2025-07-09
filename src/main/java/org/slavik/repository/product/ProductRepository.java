@@ -9,6 +9,8 @@ public interface ProductRepository {
 
     Product find(int id);
 
+    List<Product> findByEAN(String ean);
+
     List<Product> findAll();
 
     List<Product> findAll(int[] productIds);

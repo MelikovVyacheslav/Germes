@@ -6,5 +6,6 @@ import java.util.List;
 
 public interface ProductToCategoryRepository {
     List<ProductToCategory> findAll();
+    List<ProductToCategory> find(int productId);
     ProductToCategory create(ProductToCategory productToCategory);
 }

@@ -1,7 +1,7 @@
-package org.slavik.DioritB2B;
+package org.slavik.dioritB2B;
 
 import org.slavik.ApiClient;
-import org.slavik.DioritB2B.model.ShortProduct;
+import org.slavik.dioritB2B.model.ShortProduct;
 
 import java.io.IOException;
 import java.util.List;

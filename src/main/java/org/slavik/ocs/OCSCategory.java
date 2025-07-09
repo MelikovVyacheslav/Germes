@@ -1,4 +1,4 @@
-package org.slavik.OCS;
+package org.slavik.ocs;
 
 import com.fasterxml.jackson.annotation.*;
 import java.util.List;

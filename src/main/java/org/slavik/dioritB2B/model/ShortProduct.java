@@ -1,4 +1,4 @@
-package org.slavik.DioritB2B.model;
+package org.slavik.dioritB2B.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -134,6 +134,23 @@ public class ShortProduct {
             }
         }
         return null;
+    }
+
+    public String extractLastPartFromUrl(String url) {
+        if (url == null || url.trim().isEmpty()) {
+            throw new IllegalArgumentException("URL не может быть пустым");
+        }
+
+        while (url.endsWith("/")) {
+            url = url.substring(0, url.length() - 1);
+        }
+
+        int lastSlashIndex = url.lastIndexOf('/');
+        if (lastSlashIndex == -1) {
+            return url;
+        }
+
+        return url.substring(lastSlashIndex + 1);
     }
 }
 

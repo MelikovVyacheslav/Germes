@@ -1,11 +1,10 @@
-package org.slavik.DioritB2B.model;
+package org.slavik.dioritB2B.model;
 
 import java.io.IOException;
-import java.io.IOException;
+
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.annotation.*;
-import com.fasterxml.jackson.core.type.*;
 
 @JsonDeserialize(using = Attribute.Deserializer.class)
 @JsonSerialize(using = Attribute.Serializer.class)
