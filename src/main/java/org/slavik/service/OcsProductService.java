@@ -1,8 +1,8 @@
 package org.slavik.service;
 
 
-import org.slavik.OCS.OCSAPIClientImpl;
-import org.slavik.OCS.model.*;
+import org.slavik.ocs.OCSAPIClientImpl;
+import org.slavik.ocs.model.*;
 import org.slavik.entity.product.Product;
 import org.slavik.entity.product.ProductDescription;
 import org.slavik.repository.JdbcProductDescriptionRepository;

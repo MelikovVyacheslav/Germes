@@ -2,7 +2,6 @@ package org.slavik.entity.product;
 
 import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.Nullable;
-import org.slavik.OCS.model.Price;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;
@@ -154,11 +153,6 @@ public class Product {
 
     public int getDnId() {
         return dnId;
-    }
-
-    public String convertImageUrlToPath(String originalUrl) {
-        String fileName = originalUrl.substring(originalUrl.lastIndexOf('/') + 1);
-        return "catalog/b2b/" + fileName;
     }
 
     public static class Mapper implements RowMapper<Product> {

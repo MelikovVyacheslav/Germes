@@ -1,14 +1,26 @@
+
 package org.slavik.service;
 
-import org.slavik.DioritB2B.DioritAPIClientImpl;
-import org.slavik.DioritB2B.model.DioritProduct;
-import org.slavik.DioritB2B.model.ShortProduct;
+import com.jcraft.jsch.SftpException;
+import org.slavik.dioritB2B.DioritAPIClientImpl;
+import org.slavik.dioritB2B.model.DioritProduct;
+import org.slavik.dioritB2B.model.ShortProduct;
+import org.slavik.connector.JschSftpClient;
+import org.slavik.entity.attribute.Attribute;
+import org.slavik.entity.attribute.AttributeDescription;
 import org.slavik.entity.manufacturer.Manufacturer;
 import org.slavik.entity.product.*;
-import org.slavik.repository.*;
+import org.slavik.repository.attribute.JdbcAttributeDescriptionRepository;
+import org.slavik.repository.attribute.JdbcAttributeRepository;
+import org.slavik.repository.manufacturer.JdbcManufacturerRepository;
+import org.slavik.repository.product.JdbcProductAttributeRepository;
+import org.slavik.repository.product.JdbcProductDescriptionRepository;
+import org.slavik.repository.product.JdbcProductRepository;
+import org.slavik.repository.product.JdbcProductToCategoryRepository;
 
 import java.sql.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public class DioritProductService implements ProductService {
@@ -18,38 +30,41 @@ public class DioritProductService implements ProductService {
     private final JdbcProductRepository jdbcProductRepository;
     private final JdbcProductToCategoryRepository jdbcProductToCategory;
     private final JdbcManufacturerRepository jdbcManufacturerRepository;
-    private final JdbcProductToStoreRepository jdbcProductToStoreRepository;
-    private final JdbcProductToLayoutRepository jdbcProductToLayoutRepository;
+    private final JdbcAttributeRepository jdbcAttributeRepository;
+    private final JdbcAttributeDescriptionRepository jdbcAttributeDescriptionRepository;
+    private final JdbcProductAttributeRepository jdbcProductAttributeRepository;
+    private final JschSftpClient jschSftpClient;
 
     public DioritProductService(DioritAPIClientImpl apiClient,
                                 JdbcProductDescriptionRepository jdbcProductDescriptionRepository,
                                 JdbcProductRepository jdbcProductRepository,
                                 JdbcProductToCategoryRepository jdbcProductToCategory,
-                                JdbcManufacturerRepository jdbcManufacturerRepository, JdbcProductToStoreRepository jdbcProductToStoreRepository, JdbcProductToLayoutRepository jdbcProductToLayoutRepository) {
+                                JdbcManufacturerRepository jdbcManufacturerRepository,
+                                JdbcAttributeRepository jdbcAttributeRepository,
+                                JdbcAttributeDescriptionRepository jdbcAttributeDescriptionRepository,
+                                JdbcProductAttributeRepository jdbcProductAttributeRepository, JschSftpClient jschSftpClient) {
         this.apiClient = apiClient;
         this.jdbcProductDescriptionRepository = jdbcProductDescriptionRepository;
         this.jdbcProductRepository = jdbcProductRepository;
         this.jdbcProductToCategory = jdbcProductToCategory;
         this.jdbcManufacturerRepository = jdbcManufacturerRepository;
-        this.jdbcProductToStoreRepository = jdbcProductToStoreRepository;
-        this.jdbcProductToLayoutRepository = jdbcProductToLayoutRepository;
+        this.jdbcAttributeRepository = jdbcAttributeRepository;
+        this.jdbcAttributeDescriptionRepository = jdbcAttributeDescriptionRepository;
+        this.jdbcProductAttributeRepository = jdbcProductAttributeRepository;
+        this.jschSftpClient = jschSftpClient;
     }
 
     private final Date CURRENT_DATE = new Date(System.currentTimeMillis());
+    private final String EAN_VALUE = "dioritb2b";
     private final int WEIGHT_CLASS_ID = 0;
     private final int LENGTH_CLASS_ID = 0;
-    private final int STATUS_VALUE = 6;
+    private final int STATUS_VALUE = 1;
     private final int DN_ID = 0;
-<<<<<<< HEAD
-=======
-    private final int STOCK_STATUS = 6;
-    private final int STORE_ID = 0;
-    private final int LAYOUT_ID = 0;
-
->>>>>>> f12d2b8978d5ca5d16d766e4ea360f7fd86137d3
+    private final int STOCK_STATUS = 7;
+    private final int LANGUAGE_ID = 1;
 
     @Override
-    public void sync() {
+    public void sync() throws SftpException {
         List<ShortProduct> allProductAPI = apiClient.getAllProduct();
         List<ProductDescription> allProductDescriptionDataBase = jdbcProductDescriptionRepository.findAll();
         boolean isThereProduct;
@@ -64,77 +79,56 @@ public class DioritProductService implements ProductService {
                 }
             }
             if (isThereProduct) {
-                jdbcProductRepository.update(new Product(
-                        productId,
-                        creatorOfSkuNumbers(productAPI.getSku()),
-                        creatorOfSkuNumbers(productAPI.getSku()),
-                        "dioritb2b",
-                        productAPI.getStock(),
-                        STOCK_STATUS,
-                        productAPI.getMainPhoto(),
-                        brandProductRatio(productAPI.getID()),
-                        productAPI.getPrice(),
-                        CURRENT_DATE,
-                        productAPI.getWeight(),
-                        WEIGHT_CLASS_ID,
-                        productAPI.getLength(),
-                        productAPI.getWidth(),
-                        productAPI.getHeight(),
-                        LENGTH_CLASS_ID,
-                        productAPI.getStock(),
-                        STATUS_VALUE,
-                        CURRENT_DATE,
-                        CURRENT_DATE,
-                        DN_ID
-                ));
-                jdbcProductToLayoutRepository.create(new ProductToLayout(
-                        productId,
-                        STORE_ID,
-                        LAYOUT_ID
-                ));
+                jdbcProductRepository.update(createProduct(productId, productAPI));
                 System.out.println("Update " + productId);
             } else {
-                Product product = jdbcProductRepository.create(new Product(
-                        0,
-                        creatorOfSkuNumbers(productAPI.getSku()),
-                        creatorOfSkuNumbers(productAPI.getSku()),
-                        "dioritb2b",
-                        productAPI.getStock(),
-                        6,
-                        productAPI.getMainPhoto(),
-                        brandProductRatio(productAPI.getID()),
-                        productAPI.getPrice(),
-                        CURRENT_DATE,
-                        productAPI.getWeight(),
-                        WEIGHT_CLASS_ID,
-                        productAPI.getLength(),
-                        productAPI.getWidth(),
-                        productAPI.getHeight(),
-                        LENGTH_CLASS_ID,
-                        productAPI.getStock(),
-                        STATUS_VALUE,
-                        CURRENT_DATE,
-                        CURRENT_DATE,
-                        DN_ID
-                ));
+                Product product = jdbcProductRepository.create(createProduct(0, productAPI));
                 jdbcProductDescriptionRepository.create(new ProductDescription(
-                        jdbcProductRepository.gettingProductIdForNewProduct(),
+                        product.getProductId(),
                         productAPI.getName(),
                         productAPI.getDescription()
                 ));
-                syncTableProductToCategory(product.getProductId());
-                jdbcProductRepository.createProductImage(productAPI, product);
-                jdbcProductToStoreRepository.create(new ProductToStore(
+                jdbcProductToCategory.create(new ProductToCategory(
                         product.getProductId(),
-                        STORE_ID
+                        2012
                 ));
-                jdbcProductToLayoutRepository.create(new ProductToLayout(
-                        product.getProductId(),
-                        STORE_ID,
-                        LAYOUT_ID
-                ));
+                createAttribute(productAPI, product.getProductId());
+                addingAllPhotos(productAPI);
                 System.out.println("Create " + product.getProductId());
             }
+        }
+    }
+
+    private Product createProduct(int productId, ShortProduct product) {
+        return new Product(
+                productId,
+                creatorOfSkuNumbers(product.getSku()),
+                creatorOfSkuNumbers(product.getSku()),
+                EAN_VALUE,
+                product.getStock(),
+                STOCK_STATUS,
+                product.extractLastPartFromUrl(product.getPhotos().get(0)),
+                brandProductRatio(product.getID()),
+                product.getPrice(),
+                CURRENT_DATE,
+                product.getWeight(),
+                WEIGHT_CLASS_ID,
+                product.getLength(),
+                product.getWidth(),
+                product.getHeight(),
+                LENGTH_CLASS_ID,
+                product.getStock(),
+                STATUS_VALUE,
+                CURRENT_DATE,
+                CURRENT_DATE,
+                DN_ID
+        );
+    }
+
+    private void addingAllPhotos(ShortProduct product) throws SftpException {
+        jschSftpClient.isConnected();
+        for (String photo : product.getPhotos()) {
+            jschSftpClient.downloadFile(product.extractLastPartFromUrl(photo), "sftp://u3045843@80.78.252.245/var/www/u3045843/data/www/germes.vip/image/catalog/b2b");
         }
     }
 
@@ -150,17 +144,44 @@ public class DioritProductService implements ProductService {
         return manufacturer.getManufacturerId();
     }
 
-    public void syncTableProductToCategory(int productId) {
-        List<ProductToCategory> allProductToCategory = jdbcProductToCategory.findAll();
-        jdbcProductToCategory.create(new ProductToCategory(
-                productId,
-                2012
-        ));
+    private void createAttribute(ShortProduct product, int productId) {
+        Map<String, Object> attributeMap = product.extractAttributesExceptGroup(product);
+        for (Map.Entry<String, Object> entry : attributeMap.entrySet()) {
+            List<AttributeDescription> attributeDescriptions =
+                    jdbcAttributeDescriptionRepository.findByName(entry.getKey());
+
+            if (!attributeDescriptions.isEmpty()) {
+                AttributeDescription attributeDesc = attributeDescriptions.get(0);
+                jdbcProductAttributeRepository.create(new ProductAttribute(
+                        productId,
+                        attributeDesc.getAttributeId(),
+                        LANGUAGE_ID,
+                        entry.getValue().toString()
+                ));
+            } else {
+                Attribute newAttribute = jdbcAttributeRepository.create(new Attribute(
+                        0,
+                        1,
+                        0
+                ));
+                AttributeDescription newAttributeDescription =
+                        jdbcAttributeDescriptionRepository.create(new AttributeDescription(
+                                newAttribute.getAttributeId(),
+                                LANGUAGE_ID,
+                                entry.getKey()
+                        ));
+
+                jdbcProductAttributeRepository.create(new ProductAttribute(
+                        productId,
+                        newAttributeDescription.getAttributeId(),
+                        LANGUAGE_ID,
+                        entry.getValue().toString()
+                ));
+            }
+        }
     }
 
     private String creatorOfSkuNumbers(String sku) {
         return sku + "30";
     }
-
-
 }
