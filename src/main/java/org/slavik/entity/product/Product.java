@@ -58,6 +58,7 @@ public class Product {
         this.dnId = dnId;
     }
 
+
     public int getProductId() {
         return productId;
     }
@@ -90,7 +91,7 @@ public class Product {
         return manufacturerId;
     }
 
-    public int getPrice() {
+    public double getPrice() {
         return price;
     }
 

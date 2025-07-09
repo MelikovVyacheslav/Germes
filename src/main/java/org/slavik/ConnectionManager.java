@@ -25,11 +25,7 @@ public class ConnectionManager {
         dataSource.setUrl(url);
         dataSource.setUsername(user);
         dataSource.setPassword(password);
-
-        // Сохраняем созданный DataSource в поле класса
         this.con = dataSource;
-
-        // Возвращаем DataSource
         return dataSource;
     }
 

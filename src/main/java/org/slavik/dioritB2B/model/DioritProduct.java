@@ -104,4 +104,9 @@ public class DioritProduct {
         }
         return null;
     }
+
+
+    public int getProductId() {
+        return 0;
+    }
 }

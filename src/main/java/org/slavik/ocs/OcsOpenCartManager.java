@@ -23,10 +23,10 @@ public class OcsOpenCartManager {
             throw new IllegalArgumentException("Ожидается JSON-массив.");
         }
 
-        for (JsonNode node : root) {
-//            Product product = parseProduct(node);
+//        for (JsonNode node : root) {
+//          Product product = parseProduct(node);
 //            saveProductToDB(product);
-        }
+//        }
     }
 
 //    private Product parseProduct(JsonNode node) {
@@ -95,7 +95,7 @@ public class OcsOpenCartManager {
             stmt.setInt(6, product.getStockStatusId());
             stmt.setString(7, product.getImage());
             stmt.setInt(8, product.getManufacturerId());
-            stmt.setInt(9, product.getPrice());
+            stmt.setDouble(9, product.getPrice());
             stmt.setDate(10, product.getDateAvailable());
             stmt.setDouble(11, product.getWeight());
             stmt.setInt(12, product.getWeightClassId());
