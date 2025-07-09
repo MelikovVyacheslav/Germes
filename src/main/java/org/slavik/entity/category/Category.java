@@ -4,21 +4,23 @@ import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.Nullable;
 import org.springframework.jdbc.core.RowMapper;
 
+import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class Category {
     private final int categoryId;
     private final int parentId;
-    private final String dateAdded;
-    private final String dateModified;
+    private final Date dateAdded;
+    private final Date dateModified;
 
-    public Category(int categoryId, int parentId, String dateAdded, String dateModified) {
+    public Category(int categoryId, int parentId, Date dateAdded, Date dateModified) {
         this.categoryId = categoryId;
         this.parentId = parentId;
         this.dateAdded = dateAdded;
         this.dateModified = dateModified;
     }
+
 
     public int getCategoryId() {
         return categoryId;
@@ -28,13 +30,15 @@ public class Category {
         return parentId;
     }
 
-    public String getDateAdded() {
+    public Date getDateAdded() {
         return dateAdded;
     }
 
-    public String getDateModified() {
+    public Date getDateModified() {
         return dateModified;
     }
+
+
 
     public static class Mapper implements RowMapper<Category> {
 
@@ -42,8 +46,8 @@ public class Category {
         public @Nullable Category mapRow(@NotNull ResultSet rs, int rowNum) throws SQLException {
             int categoryId = rs.getInt("category_id");
             int parentId = rs.getInt("parent_id");
-            String dateAdded = rs.getString("date_added");
-            String dateModify = rs.getString("date_modified");
+            Date dateAdded = rs.getDate("date_added");
+            Date dateModify = rs.getDate("date_modified");
             return new Category(
                     categoryId,
                     parentId,

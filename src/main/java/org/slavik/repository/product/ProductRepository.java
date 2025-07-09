@@ -5,18 +5,17 @@ import org.slavik.entity.product.Product;
 import java.util.List;
 
 public interface ProductRepository {
-    Product create(Product product);
 
-    Product find(int id);
+        Product create(Product product);
 
-    List<Product> findByEAN(String ean);
+        Product find(int id);
 
-    List<Product> findAll();
+        List<Product> findAll();
 
-    List<Product> findAll(int[] productIds);
+        List<Product> findAll(int[] productIds);
 
-    Product update(Product product);
-
+        Product update(Product product);
 
 
-}
+
+    }

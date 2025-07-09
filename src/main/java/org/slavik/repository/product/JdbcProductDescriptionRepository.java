@@ -52,8 +52,7 @@ public class JdbcProductDescriptionRepository implements ProductDescriptionRepos
     @Override
     public List<ProductDescription> findAll() {
         String sql = """
-                SELECT opd.product_id, opd.name, opd.description FROM oc_product op, oc_product_description opd
-                WHERE op.ean = 'dioritb2b' AND op.product_id = opd.product_id;
+                SELECT * FROM oc_product_description
                 """;
         List<ProductDescription> products = jdbcOperations.query(sql, new ProductDescription.Mapper());
         return products;

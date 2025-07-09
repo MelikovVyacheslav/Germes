@@ -5,13 +5,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slavik.AbstractApiClient;
 import org.slavik.ApiClient;
 import org.slavik.dioritB2B.APISourceConfiguration;
+import org.slavik.ocs.model.OCSProductResponse;
+import org.slavik.ocs.model.Result;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class OCSAPIClientImpl extends AbstractApiClient implements ApiClient {
+public class OCSAPIClientImpl extends AbstractApiClient implements OCSApiClient {
 
     private final APISourceConfiguration apiSourceConfiguration
              = new APISourceConfiguration(
@@ -171,5 +174,36 @@ public class OCSAPIClientImpl extends AbstractApiClient implements ApiClient {
                 .block();
         System.out.println("Response: " + responseFlux);
         return responseFlux;
+    }
+
+    @Override
+    public List<Result> getAll() {
+        List<Result> products = new ArrayList<>();
+
+        try {
+            String url = apiSourceConfiguration.baseUrl() + "/catalog/categories/all/products";
+
+            String jsonResponse = webClient.get()
+                    .uri(url)
+                    .header(apiSourceConfiguration.tokenHeaderKey(), apiSourceConfiguration.token())
+                    .accept(MediaType.APPLICATION_JSON)
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block();
+
+            if (jsonResponse == null || jsonResponse.isEmpty()) {
+                System.out.println("Пустой ответ от API.");
+                return products;
+            }
+            ObjectMapper mapper = new ObjectMapper();
+            OCSProductResponse response = mapper.readValue(jsonResponse, OCSProductResponse.class);
+            if (response.getResult() != null) {
+                products = response.getResult();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return products;
     }
 }

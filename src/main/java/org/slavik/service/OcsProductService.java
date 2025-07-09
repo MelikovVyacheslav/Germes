@@ -1,29 +1,30 @@
 package org.slavik.service;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slavik.ocs.OCSAPIClientImpl;
 import org.slavik.ocs.model.*;
+import org.slavik.entity.category.Category;
+import org.slavik.entity.category.CategoryDescription;
 import org.slavik.entity.product.Product;
 import org.slavik.entity.product.ProductDescription;
-import org.slavik.repository.JdbcProductDescriptionRepository;
-import org.slavik.repository.JdbcProductRepository;
+import org.slavik.entity.product.ProductToCategory;
+import org.slavik.repository.category.JdbcCategoryDescriptionRepository;
+import org.slavik.repository.category.JdbcCategoryRepository;
+import org.slavik.repository.product.JdbcProductDescriptionRepository;
+import org.slavik.repository.product.JdbcProductRepository;
+import org.slavik.repository.product.JdbcProductToCategoryRepository;
 
 import java.sql.Date;
 import java.util.List;
 
 public class OcsProductService implements ProductService {
     private final OCSAPIClientImpl apiClient;
+    private final JdbcCategoryRepository jdbcCategoryRepository;
+    private final JdbcCategoryDescriptionRepository jdbcCategoryDescriptionRepository;
     private final JdbcProductDescriptionRepository jdbcProductDescriptionRepository;
     private final JdbcProductRepository jdbcProductRepository;
-
-    public OcsProductService(OCSAPIClientImpl apiClient,
-                             JdbcProductDescriptionRepository jdbcProductDescriptionRepository,
-                             JdbcProductRepository jdbcProductRepository) {
-
-        this.apiClient = apiClient;
-        this.jdbcProductDescriptionRepository = jdbcProductDescriptionRepository;
-        this.jdbcProductRepository = jdbcProductRepository;
-    }
+    private final JdbcProductToCategoryRepository jdbcProductToCategoryRepository;
 
     private final int MANUFACTURER_ID = 1;
     private final Date CURRENT_DATE = new Date(System.currentTimeMillis());
@@ -32,12 +33,17 @@ public class OcsProductService implements ProductService {
     private final int STATUS_VALUE = 6;
     private final int DN_ID = 0;
 
-    @Override
-<<<<<<< Updated upstream
+    public OcsProductService(OCSAPIClientImpl apiClient, JdbcProductDescriptionRepository descriptionRepo, JdbcProductRepository productRepo, JdbcProductToCategoryRepository productToCategory, JdbcCategoryRepository jdbcCategoryRepository, JdbcCategoryDescriptionRepository jdbcCategoryDescriptionRepository1) {
+        this.apiClient = apiClient;
+        this.jdbcCategoryRepository = jdbcCategoryRepository;
+        this.jdbcProductDescriptionRepository = descriptionRepo;
+        this.jdbcProductRepository = productRepo;
+        this.jdbcProductToCategoryRepository = productToCategory;
+        this.jdbcCategoryDescriptionRepository = jdbcCategoryDescriptionRepository1;
+    }
+
+
     public void sync() throws JsonProcessingException {
-=======
-    public void sync() {
->>>>>>> Stashed changes
         List<Result> allProductAPI = apiClient.getAll();
         List<ProductDescription> allProductDescriptionDataBase = jdbcProductDescriptionRepository.findAll();
         boolean isThereProduct;
@@ -91,10 +97,10 @@ public class OcsProductService implements ProductService {
                         productAPI.getProduct().getProductName(),
                         productAPI.getProduct().getProductDescription()
                 ));
+                syncTableProductToCategory(productId, productAPI);
             } else {
-                int newProductId = jdbcProductRepository.gettingProductIdForNewProduct();
-                jdbcProductRepository.create(new Product(
-                        newProductId,
+                Product newProduct = jdbcProductRepository.create(new Product(
+                        0,
                         productAPI.getProduct().getProductKey(),
                         productAPI.getProduct().getProductKey(),
                         "OCS",
@@ -117,12 +123,74 @@ public class OcsProductService implements ProductService {
                         DN_ID
                 ));
                 jdbcProductDescriptionRepository.create(new ProductDescription(
-                        newProductId,
+                        newProduct.getProductId(),
                         productAPI.getProduct().getProductName(),
                         productAPI.getProduct().getProductDescription()
                 ));
+                syncTableProductToCategory(newProduct.getProductId(), productAPI);
             }
+        }
 
+    }
+
+    public void syncTableProductToCategory(int productId, Result result) {
+        String nameCategory = result.getProduct().getCatalogPath().get(0).getName();
+
+        // 1. Проверяем, есть ли такая категория
+        boolean isThereCategory = checkThereCategory(result.getProduct().getCatalogPath().get(0));
+
+        // 2. Если категории нет — создаём
+        if (!isThereCategory) {
+            // создаём Category с временным id = 0 и родительским id = 1182
+            Category newCategory = new Category(0, 1182, CURRENT_DATE, CURRENT_DATE);
+
+            // создаём Category и получаем сгенерированный categoryId
+            Category createdCategory = jdbcCategoryRepository.create(newCategory);
+
+            // создаём описание для категории
+            // создаём описание для категории
+            CategoryDescription description = new CategoryDescription(
+                    createdCategory.getCategoryId(),
+                    nameCategory,  // name
+                    nameCategory,  // description
+                    nameCategory   // meta
+            );
+            jdbcCategoryDescriptionRepository.create(description);
+
+        }
+
+        // 3. Получаем все категории (уже включая новую)
+        List<Category> categoryList = jdbcCategoryRepository.findAll();
+
+        // 4. Ищем по имени и связываем с продуктом
+        for (Category category : categoryList) {
+            List<CategoryDescription> descriptions = jdbcCategoryDescriptionRepository.find(category.getCategoryId());
+
+            for (CategoryDescription categoryDescription : descriptions) {
+                if (categoryDescription.getDescription().equals(nameCategory)) {
+                    List<ProductToCategory> productToCategories = jdbcProductToCategoryRepository.find(productId, category.getCategoryId());
+
+                    if (productToCategories.isEmpty()) {
+                        jdbcProductToCategoryRepository.create(
+                                new ProductToCategory(productId, category.getCategoryId())
+                        );
+                    }
+
+
+                    // Связь уже найдена, дальше идти не надо
+                    break;
+                }
+            }
+        }
+
+    }
+
+    private boolean checkThereCategory(CatalogPath catalogPath) {
+        CategoryDescription categoryDescription = jdbcCategoryDescriptionRepository.findByName(catalogPath.getName());
+        if (categoryDescription == null) {
+            return false;
+        } else {
+            return true;
         }
     }
 }

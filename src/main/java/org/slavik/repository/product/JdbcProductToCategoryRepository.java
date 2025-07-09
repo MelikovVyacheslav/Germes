@@ -11,6 +11,7 @@ public class JdbcProductToCategoryRepository implements ProductToCategoryReposit
 
     public JdbcProductToCategoryRepository(NamedParameterJdbcOperations jdbcOperations) {
         this.jdbcOperations = jdbcOperations;
+
     }
 
     @Override
@@ -23,19 +24,21 @@ public class JdbcProductToCategoryRepository implements ProductToCategoryReposit
     }
 
     @Override
-    public List<ProductToCategory> find(int productId) {
+    public List<ProductToCategory> find(int productId, int categoryId) {
         String sql = """
                 select * from oc_product_to_category
-                where product_id = :productId;
+                where product_id = :productId and category_id = :categoryId;
                 """;
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("productId", productId);
-        List<ProductToCategory> productToCategoryList = jdbcOperations.query(sql, params, new ProductToCategory.Mapper());
-        return productToCategoryList;
+        params.addValue("categoryId", categoryId);
+        List<ProductToCategory> result = jdbcOperations.query(sql, params, new ProductToCategory.Mapper());
+        return result;
     }
 
     @Override
     public ProductToCategory create(ProductToCategory productToCategory) {
+
         String sql = """
                 insert into oc_product_to_category(product_id, category_id) values (
                 :productId, :categoryId);
@@ -46,4 +49,47 @@ public class JdbcProductToCategoryRepository implements ProductToCategoryReposit
         jdbcOperations.update(sql, params);
         return productToCategory;
     }
+
+    public boolean existsByProductIdAndCategoryId(int productId, int categoryId) {
+        String sql = """
+                    SELECT COUNT(*) FROM oc_product_to_category
+                    WHERE product_id = :productId AND category_id = :categoryId
+                """;
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("productId", productId);
+        params.addValue("categoryId", categoryId);
+
+        Integer count = jdbcOperations.queryForObject(sql, params, Integer.class);
+        return count != null && count > 0;
+    }
+
+
+    public int createCategory(String name) {
+
+        int newCategoryId = getNextCategoryId();
+
+        String insertCategorySql = """
+                    INSERT INTO oc_category (category_id) VALUES (:id)
+                """;
+        String insertCategoryDescriptionSql = """
+                    INSERT INTO oc_category_description (category_id, name) VALUES (:id, :name)
+                """;
+
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("id", newCategoryId);
+        params.addValue("name", name);
+
+        jdbcOperations.update(insertCategorySql, params);
+        jdbcOperations.update(insertCategoryDescriptionSql, params);
+
+        return newCategoryId;
+    }
+
+    public int getNextCategoryId() {
+        String sql = "SELECT MAX(category_id) + 1 FROM oc_category";
+        Integer id = jdbcOperations.queryForObject(sql, new MapSqlParameterSource(), Integer.class);
+        return id != null ? id : 1;
+    }
+
+
 }

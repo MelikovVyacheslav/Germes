@@ -72,8 +72,9 @@ public class JdbcCategoryRepository implements CategoryRepository {
         params.addValue("dateAdded", category.getDateAdded());
         params.addValue("dateModified", category.getDateModified());
         params.addValue("noindex", NOINDEX_VALUE);
-        Category createdCategory = jdbcOperations.queryForObject(sql, params, new Category.Mapper());
-        return createdCategory;
+        jdbcOperations.update(sql, params);
+        Category newCategory = find(getLastId());
+        return newCategory;
     }
 
     @Override
@@ -92,4 +93,11 @@ public class JdbcCategoryRepository implements CategoryRepository {
         return null;
     }
 
+    private Integer getLastId() {
+        String sql = """
+                select max(category_id) from oc_category;
+                """;
+        Integer id = jdbcOperations.queryForObject(sql, new MapSqlParameterSource(), Integer.class);
+        return id;
+    }
 }
