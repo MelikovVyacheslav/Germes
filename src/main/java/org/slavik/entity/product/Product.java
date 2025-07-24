@@ -2,6 +2,7 @@ package org.slavik.entity.product;
 
 import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.Nullable;
+import org.slavik.ocs.model.ResultElement;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;

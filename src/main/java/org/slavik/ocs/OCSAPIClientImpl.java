@@ -7,17 +7,20 @@ import org.slavik.ApiClient;
 import org.slavik.dioritB2B.APISourceConfiguration;
 import org.slavik.ocs.model.OCSProductResponse;
 import org.slavik.ocs.model.Result;
+import org.slavik.ocs.model.ResultElement;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class OCSAPIClientImpl extends AbstractApiClient implements OCSApiClient {
 
     private final APISourceConfiguration apiSourceConfiguration
-             = new APISourceConfiguration(
+            = new APISourceConfiguration(
             "https://connector.b2b.ocs.ru/api/v2",
             "TSWJXggwvt59l9nuYVvtSM?iyea0DR",
             "X-API-Key",
@@ -206,4 +209,39 @@ public class OCSAPIClientImpl extends AbstractApiClient implements OCSApiClient 
 
         return products;
     }
+
+    public ResultElement characteristics(int id) {
+
+        try {
+            String url = "https://connector.b2b.ocs.ru/api/v2/content/" + id;
+
+            String jsonResponse = webClient.get()
+                    .uri(url)
+                    .header(apiSourceConfiguration.tokenHeaderKey(), apiSourceConfiguration.token())
+                    .accept(MediaType.APPLICATION_JSON)
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block();
+
+            if (jsonResponse == null || jsonResponse.isEmpty()) {
+                System.out.println("Пустой ответ от API.");
+                return null;
+            }
+
+            ObjectMapper mapper = new ObjectMapper();
+
+            // Если ответ идёт в обёртке:
+            // OCSCharacteristicResponse response = mapper.readValue(jsonResponse, OCSCharacteristicResponse.class);
+            // return response.getResult();
+
+            // Если напрямую:
+            ResultElement result = mapper.readValue(jsonResponse, ResultElement.class);
+            return result;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 }
+

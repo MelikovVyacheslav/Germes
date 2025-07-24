@@ -2,11 +2,16 @@ package org.slavik;
 
 import org.slavik.breez.BreezApiClientImpl;
 import org.slavik.breez.model.BreezProductResponse;
+import org.slavik.connector.JschSftpClient;
+import org.slavik.connector.SftpClientProperties;
 import org.slavik.dioritB2B.APISourceConfiguration;
 import org.slavik.entity.category.Category;
 import org.slavik.ocs.OCSAPIClientImpl;
+import org.slavik.repository.attribute.JdbcAttributeDescriptionRepository;
+import org.slavik.repository.attribute.JdbcAttributeRepository;
 import org.slavik.repository.category.JdbcCategoryDescriptionRepository;
 import org.slavik.repository.category.JdbcCategoryRepository;
+import org.slavik.repository.product.JdbcProductAttributeRepository;
 import org.slavik.repository.product.JdbcProductDescriptionRepository;
 import org.slavik.repository.product.JdbcProductRepository;
 import org.slavik.repository.product.JdbcProductToCategoryRepository;
@@ -40,12 +45,15 @@ public class Main {
         DataSource dataSource = connectionManager.connection();
         NamedParameterJdbcOperations jdbcOperations = new NamedParameterJdbcTemplate(dataSource);
         OCSAPIClientImpl apiClient = new OCSAPIClientImpl(webClientConfiguration.getAPIWebClient());
+        JdbcAttributeRepository jdbcAttributeRepository = new JdbcAttributeRepository(jdbcOperations);
+        JdbcProductAttributeRepository jdbcProductAttributeRepository = new JdbcProductAttributeRepository(jdbcOperations);
+        JdbcAttributeDescriptionRepository jdbcAttributeDescriptionRepository = new JdbcAttributeDescriptionRepository(jdbcOperations);
         JdbcCategoryDescriptionRepository jdbcCategoryDescriptionRepository = new JdbcCategoryDescriptionRepository(jdbcOperations);
         JdbcCategoryRepository jdbcCategoryRepository = new JdbcCategoryRepository(jdbcOperations);
         JdbcProductDescriptionRepository descriptionRepo = new JdbcProductDescriptionRepository(jdbcOperations);
         JdbcProductRepository productRepo = new JdbcProductRepository(jdbcOperations);
         JdbcProductToCategoryRepository ProductToCategory = new JdbcProductToCategoryRepository(jdbcOperations);
-        OcsProductService ocsProductService = new OcsProductService(apiClient, descriptionRepo, productRepo, ProductToCategory, jdbcCategoryRepository, jdbcCategoryDescriptionRepository);// бери конкретный, который хочешь
+        OcsProductService ocsProductService = new OcsProductService(apiClient, descriptionRepo, productRepo, ProductToCategory, jdbcCategoryRepository, jdbcCategoryDescriptionRepository,jdbcAttributeDescriptionRepository,jdbcAttributeRepository,jdbcProductAttributeRepository, new JschSftpClient(new SftpClientProperties("u3045843", 22, "80.78.252.245", 2000, "3AyozD417ZU7HjwB")));// бери конкретный, который хочешь
         ocsProductService.sync();
 
     }

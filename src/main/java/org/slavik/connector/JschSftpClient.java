@@ -15,16 +15,16 @@ public class JschSftpClient implements SftpClient {
     private final Session session;
     private final ChannelSftp channel;
 
-    public JschSftpClient(SftpClientProperties configuration, String ppk) throws Exception {
+    public JschSftpClient(SftpClientProperties configuration) throws Exception {
         this.session = jsch.getSession(
                 configuration.getUserName(),
                 configuration.getHost(),
                 configuration.getPort()
         );
-
-        jsch.addIdentity("sftp", ppk.getBytes(), null, null);
+//        jsch.addIdentity(ppk, configuration.getPassphrase());
+        session.setPassword(configuration.getPassphrase());
         session.setConfig("StrictHostKeyChecking", "no");
-        session.setConfig("PreferredAuthentications", "publickey");
+        session.setConfig("PreferredAuthentications", "password");
         session.setTimeout(configuration.getTimeout());
         session.connect();
 

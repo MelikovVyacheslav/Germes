@@ -5,12 +5,14 @@ public class SftpClientProperties {
     private final String host;
     private final String userName;
     private int timeout;
+    private final String passphrase;
 
-    public SftpClientProperties(String userName, int port, String host, int timeout) {
+    public SftpClientProperties(String userName, int port, String host, int timeout, String passphrase) {
         this.port = port;
         this.host = host;
         this.userName = userName;
         this.timeout = timeout;
+        this.passphrase = passphrase;
     }
 
     public int getPort() {
@@ -27,5 +29,9 @@ public class SftpClientProperties {
 
     public int getTimeout() {
         return timeout;
+    }
+
+    public String getPassphrase() {
+        return passphrase;
     }
 }

@@ -1,7 +1,10 @@
 package org.slavik.service;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import org.slavik.connector.JschSftpClient;
+import org.slavik.entity.attribute.Attribute;
+import org.slavik.entity.attribute.AttributeDescription;
+import org.slavik.entity.product.ProductAttribute;
 import org.slavik.ocs.OCSAPIClientImpl;
 import org.slavik.ocs.model.*;
 import org.slavik.entity.category.Category;
@@ -9,12 +12,17 @@ import org.slavik.entity.category.CategoryDescription;
 import org.slavik.entity.product.Product;
 import org.slavik.entity.product.ProductDescription;
 import org.slavik.entity.product.ProductToCategory;
+import org.slavik.repository.attribute.JdbcAttributeDescriptionRepository;
+import org.slavik.repository.attribute.JdbcAttributeRepository;
 import org.slavik.repository.category.JdbcCategoryDescriptionRepository;
 import org.slavik.repository.category.JdbcCategoryRepository;
+import org.slavik.repository.product.JdbcProductAttributeRepository;
 import org.slavik.repository.product.JdbcProductDescriptionRepository;
 import org.slavik.repository.product.JdbcProductRepository;
 import org.slavik.repository.product.JdbcProductToCategoryRepository;
 
+import java.io.InputStream;
+import java.net.URL;
 import java.sql.Date;
 import java.util.List;
 
@@ -25,6 +33,11 @@ public class OcsProductService implements ProductService {
     private final JdbcProductDescriptionRepository jdbcProductDescriptionRepository;
     private final JdbcProductRepository jdbcProductRepository;
     private final JdbcProductToCategoryRepository jdbcProductToCategoryRepository;
+    private final JdbcAttributeDescriptionRepository jdbcAttributeDescriptionRepository;
+    private final JdbcAttributeRepository jdbcAttributeRepository;
+    private final JdbcProductAttributeRepository jdbcProductAttributeRepository;
+    private final JschSftpClient jschSftpClient;
+
 
     private final int MANUFACTURER_ID = 1;
     private final Date CURRENT_DATE = new Date(System.currentTimeMillis());
@@ -32,22 +45,28 @@ public class OcsProductService implements ProductService {
     private final int LENGTH_CLASS_ID = 0;
     private final int STATUS_VALUE = 6;
     private final int DN_ID = 0;
+    private final int LANGUAGE_ID = 1;
 
-    public OcsProductService(OCSAPIClientImpl apiClient, JdbcProductDescriptionRepository descriptionRepo, JdbcProductRepository productRepo, JdbcProductToCategoryRepository productToCategory, JdbcCategoryRepository jdbcCategoryRepository, JdbcCategoryDescriptionRepository jdbcCategoryDescriptionRepository1) {
+    public OcsProductService(OCSAPIClientImpl apiClient, JdbcProductDescriptionRepository descriptionRepo, JdbcProductRepository productRepo, JdbcProductToCategoryRepository productToCategory, JdbcCategoryRepository jdbcCategoryRepository, JdbcCategoryDescriptionRepository jdbcCategoryDescriptionRepository1, JdbcAttributeDescriptionRepository jdbcAttributeDescriptionRepository, JdbcAttributeRepository jdbcAttributeRepository, JdbcProductAttributeRepository jdbcProductAttributeRepository, JschSftpClient jschSftpClient) {
         this.apiClient = apiClient;
         this.jdbcCategoryRepository = jdbcCategoryRepository;
         this.jdbcProductDescriptionRepository = descriptionRepo;
         this.jdbcProductRepository = productRepo;
         this.jdbcProductToCategoryRepository = productToCategory;
         this.jdbcCategoryDescriptionRepository = jdbcCategoryDescriptionRepository1;
+        this.jdbcAttributeDescriptionRepository = jdbcAttributeDescriptionRepository;
+        this.jdbcAttributeRepository = jdbcAttributeRepository;
+        this.jdbcProductAttributeRepository = jdbcProductAttributeRepository;
+        this.jschSftpClient = jschSftpClient;
     }
 
 
-    public void sync() throws JsonProcessingException {
+    public void sync() throws Exception {
         List<Result> allProductAPI = apiClient.getAll();
         List<ProductDescription> allProductDescriptionDataBase = jdbcProductDescriptionRepository.findAll();
         boolean isThereProduct;
         int productId = 0;
+        jschSftpClient.isConnected();
         for (Result productAPI : allProductAPI) {
             if (productAPI.getLocations() == null || productAPI.getLocations().isEmpty()) {
                 continue;
@@ -76,7 +95,8 @@ public class OcsProductService implements ProductService {
                         "OCS",
                         location.getQuantity().getValue(),
                         productAPI.getProduct().getStockStatus(description),
-                        null,
+                        addImage(apiClient.characteristics(productId).getImages().getFirst().getURL()),
+                        ////////apiClient.characteristics(productId).getImages().getFirst().getURL(),
                         MANUFACTURER_ID,
                         price,
                         CURRENT_DATE,
@@ -99,6 +119,7 @@ public class OcsProductService implements ProductService {
                 ));
                 syncTableProductToCategory(productId, productAPI);
             } else {
+
                 Product newProduct = jdbcProductRepository.create(new Product(
                         0,
                         productAPI.getProduct().getProductKey(),
@@ -106,7 +127,7 @@ public class OcsProductService implements ProductService {
                         "OCS",
                         location.getQuantity().getValue(),
                         productAPI.getProduct().getStockStatus(description),
-                        null,
+                        addImage(apiClient.characteristics(productId).getImages().getFirst().getURL()),
                         MANUFACTURER_ID,
                         price,
                         CURRENT_DATE,
@@ -122,15 +143,19 @@ public class OcsProductService implements ProductService {
                         CURRENT_DATE,
                         DN_ID
                 ));
+
+
+
                 jdbcProductDescriptionRepository.create(new ProductDescription(
                         newProduct.getProductId(),
                         productAPI.getProduct().getProductName(),
                         productAPI.getProduct().getProductDescription()
                 ));
+                createAttributesFromResult(apiClient.characteristics(productId),newProduct.getProductId());
                 syncTableProductToCategory(newProduct.getProductId(), productAPI);
             }
         }
-
+        jschSftpClient.disconnect();
     }
 
     public void syncTableProductToCategory(int productId, Result result) {
@@ -185,6 +210,53 @@ public class OcsProductService implements ProductService {
 
     }
 
+    private void createAttributesFromResult(ResultElement result, int productId) {
+        if (result.getProperties() == null) {
+            System.out.println("Нет характеристик у товара: " + result.getItemID());
+            return;
+        }
+
+        for (Property property : result.getProperties()) {
+            String attributeName = property.getName();
+            String attributeValue = property.getValue() != null ? property.getValue().toString() : "";
+
+            List<AttributeDescription> attributeDescriptions =
+                    jdbcAttributeDescriptionRepository.findByName(attributeName);
+
+            if (!attributeDescriptions.isEmpty()) {
+                AttributeDescription attributeDesc = attributeDescriptions.get(0);
+
+                jdbcProductAttributeRepository.create(new ProductAttribute(
+                        productId,
+                        attributeDesc.getAttributeId(),
+                        LANGUAGE_ID,
+                        attributeValue
+                ));
+            } else {
+                Attribute newAttribute = jdbcAttributeRepository.create(new Attribute(
+                        0,
+                        1,
+                        0
+                ));
+
+                AttributeDescription newAttributeDescription =
+                        jdbcAttributeDescriptionRepository.create(new AttributeDescription(
+                                newAttribute.getAttributeId(),
+                                LANGUAGE_ID,
+                                attributeName
+                        ));
+
+                jdbcProductAttributeRepository.create(new ProductAttribute(
+                        productId,
+                        newAttributeDescription.getAttributeId(),
+                        LANGUAGE_ID,
+                        attributeValue
+                ));
+            }
+        }
+    }
+
+
     private boolean checkThereCategory(CatalogPath catalogPath) {
         CategoryDescription categoryDescription = jdbcCategoryDescriptionRepository.findByName(catalogPath.getName());
         if (categoryDescription == null) {
@@ -192,5 +264,17 @@ public class OcsProductService implements ProductService {
         } else {
             return true;
         }
+    }
+    private String addImage(String fileUrl) throws Exception {
+        String locationPath = "/var/www/u3045843/data/www/germes.vip/image/catalog/ocs";
+        String fileName = extractFileNameFromUrl(fileUrl);
+        InputStream inputStream = new URL(fileUrl).openStream();
+        jschSftpClient.uploadFile(inputStream, locationPath, fileName);
+        return "catalog/ocs/" + fileName;
+    }
+
+    public static String extractFileNameFromUrl(String url) {
+        if (url == null || url.isEmpty()) return "";
+        return url.substring(url.lastIndexOf('/') + 1);
     }
 }
