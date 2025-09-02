@@ -7,7 +7,6 @@ import java.util.List;
 public class OCSProduct {
     private int price;
     private Location location;
-    private Result result;
     private PackageInformation packageInformation;
     private String itemID;
     private String upc;
@@ -157,7 +156,7 @@ public class OCSProduct {
 
     @JsonProperty("productDescription")
     public String getProductDescription() {
-        return productDescription;
+        return productDescription != null ? productDescription : "''";
     }
 
     @JsonProperty("productDescription")
@@ -282,13 +281,13 @@ public class OCSProduct {
 
         switch (dimensionName.toLowerCase()) {
             case "weight":
-                return packageInformation != null ? packageInformation.getWeight() : null;
-            case "length":
-                return packageInformation != null ? packageInformation.getVolume() : null;
+                return packageInformation != null ? packageInformation.getWeight() : 0;
+            case "depth":
+                return packageInformation != null ? packageInformation.getVolume() : 0;
             case "width":
-                return packageInformation != null ? packageInformation.getWidth() : null;
+                return packageInformation != null ? packageInformation.getWidth() : 0;
             case "height":
-                return packageInformation != null ? packageInformation.getHeight() : null;
+                return packageInformation != null ? packageInformation.getHeight() : 0;
             default:
                 return null;
         }

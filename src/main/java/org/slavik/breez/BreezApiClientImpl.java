@@ -1,15 +1,13 @@
 package org.slavik.breez;
 
 import org.slavik.AbstractApiClient;
-import org.slavik.breez.model.BreezBrand;
-import org.slavik.breez.model.BreezCategory;
-import org.slavik.breez.model.BreezProductResponse;
-import org.slavik.breez.model.BreezTech;
+import org.slavik.breez.model.*;
 import org.slavik.dioritB2B.APISourceConfiguration;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 public class BreezApiClientImpl extends AbstractApiClient {
@@ -26,56 +24,67 @@ public class BreezApiClientImpl extends AbstractApiClient {
         super(webClient);
     }
 
-    public Map<String, BreezProductResponse> getAllProducts() throws IOException {
+    public Map<String, BreezProductResponse> getAllProducts() throws IOException, InterruptedException {
         String json = getJson("/products");
         Converter<BreezProductResponse> converter = new Converter<>();
         Map<String, BreezProductResponse> response = converter.fromJsonString(json, BreezProductResponse.class);
         return response;
     }
 
-    public Map<String, BreezProductResponse> getProductById(int productId) throws IOException {
+    public BreezProductResponse getProductById(String productId) throws IOException, InterruptedException {
         String json = getJson("/products/?id=" + productId);
         Converter<BreezProductResponse> converter = new Converter<>();
-        Map<String, BreezProductResponse> breezProductResponse = converter.fromJsonString(json, BreezProductResponse.class);
+        BreezProductResponse breezProductResponse = converter.fromJsonStringToObject(json, productId, BreezProductResponse.class);
         return breezProductResponse;
     }
 
-    public Map<String, BreezBrand> getAllBrands() throws IOException {
+    public Map<String, BreezBrand> getAllBrands() throws IOException, InterruptedException {
         String json = getJson("/brands");
         Converter<BreezBrand> converter = new Converter<>();
         Map<String, BreezBrand> brandMap = converter.fromJsonString(json, BreezBrand.class);
         return brandMap;
     }
 
-    public Map<String, BreezBrand> getBrandById(int brandId) throws IOException {
+    public BreezBrand getBrandById(String brandId) throws IOException, InterruptedException {
         String json = getJson("/brands/?id=" + brandId);
         Converter<BreezBrand> converter = new Converter<>();
-        Map<String, BreezBrand> brand = converter.fromJsonString(json, BreezBrand.class);
+        BreezBrand brand = converter.fromJsonStringToObject(json, brandId, BreezBrand.class);
         return brand;
     }
 
-    public Map<String, BreezCategory> getAllCategories() throws IOException {
+    public Map<String, BreezCategory> getAllCategories() throws IOException, InterruptedException {
         String json = getJson("/categories");
         Converter<BreezCategory> converter = new Converter<>();
         Map<String, BreezCategory> breezCategoryMap = converter.fromJsonString(json, BreezCategory.class);
         return breezCategoryMap;
     }
 
-    public Map<String, BreezCategory> getCategoryById(int categoryId) throws IOException {
+    public BreezCategory getCategoryById(String categoryId) throws IOException, InterruptedException {
         String json = getJson("/categories/?id=" + categoryId);
         Converter<BreezCategory> converter = new Converter<>();
-        Map<String, BreezCategory> breezCategory = converter.fromJsonString(json, BreezCategory.class);
+        BreezCategory breezCategory = converter.fromJsonStringToObject(json, categoryId, BreezCategory.class);
         return breezCategory;
     }
 
-    public Map<String, BreezTech> getCharacteristicsToProduct(int productId) throws IOException {
+    public BreezTech getCharacteristicsToProduct(String productId) throws IOException, InterruptedException {
         String json = getJson("/tech/?id=" + productId);
         Converter<BreezTech> converter = new Converter<>();
-        Map<String, BreezTech> breezTech = converter.fromJsonString(json, BreezTech.class);
+        BreezTech breezTech = converter.fromJsonStringToObject(json, productId, BreezTech.class);
         return breezTech;
     }
 
-    private String getJson(String apiPath) {
+    public BreezStockInfoResponse gettingWarehousesWhereTheProductAreLocated(String nc) throws IOException, InterruptedException {
+        BreezStockInfoResponse json = webClient.get()
+                .uri(apiSourceConfiguration.baseUrl() + "/leftovers/?nc=" + nc)
+                .header(apiSourceConfiguration.tokenHeaderKey(), apiSourceConfiguration.token())
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToMono(BreezStockInfoResponse.class)
+                .block();
+        return json;
+    }
+
+    private String getJson(String apiPath) throws InterruptedException {
         String json = webClient.get()
                 .uri(apiSourceConfiguration.baseUrl() + apiPath)
                 .header(apiSourceConfiguration.tokenHeaderKey(), apiSourceConfiguration.token())
@@ -84,5 +93,9 @@ public class BreezApiClientImpl extends AbstractApiClient {
                 .bodyToMono(String.class)
                 .block();
         return json;
+    }
+
+    public WebClient getWebClient() {
+        return webClient;
     }
 }

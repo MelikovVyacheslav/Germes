@@ -30,18 +30,16 @@ public class JdbcManufacturerRepository implements ManufacturerRepository {
     public Manufacturer find(String name) {
         String sql = """
                 select * from oc_manufacturer
-                where name = :name;
+                where name = :name
+                limit 1;
                 """;
         MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("name", name);
         Manufacturer manufacturer;
         try {
-            params.addValue("name", name);
             manufacturer = jdbcOperations.queryForObject(sql, params, new Manufacturer.Mapper());
-        } catch (EmptyResultDataAccessException e ) {
-            manufacturer = create(new Manufacturer(
-                    0,
-                    name
-            ));
+        } catch (Exception e) {
+            return null;
         }
         return manufacturer;
     }

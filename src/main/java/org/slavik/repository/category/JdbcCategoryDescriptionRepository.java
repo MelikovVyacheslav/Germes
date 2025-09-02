@@ -1,19 +1,23 @@
 package org.slavik.repository.category;
 
 import org.slavik.entity.category.CategoryDescription;
+import org.slavik.repository.OperationRepository;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 
 import java.util.Arrays;
 import java.util.List;
 
-public class JdbcCategoryDescriptionRepository implements CategoryDescriptionRepository {
+public class JdbcCategoryDescriptionRepository implements CategoryDescriptionRepository, OperationRepository {
     private final NamedParameterJdbcOperations jdbcOperations;
+    private final JdbcTemplate jdbcTemplate;
 
     private final int LANGUAGE_ID_VALUE = 1;
 
-    public JdbcCategoryDescriptionRepository(NamedParameterJdbcOperations jdbcOperations) {
+    public JdbcCategoryDescriptionRepository(NamedParameterJdbcOperations jdbcOperations, JdbcTemplate jdbcTemplate) {
         this.jdbcOperations = jdbcOperations;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override
@@ -52,15 +56,31 @@ public class JdbcCategoryDescriptionRepository implements CategoryDescriptionRep
         return categoryDescriptions;
     }
 
+    public List<CategoryDescription> findByName(String name) {
+        String sql = """
+                select * from oc_category_description
+                where name = :name;
+                """;
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("name", name);
+        try {
+            List<CategoryDescription> categoryDescription = jdbcOperations.query(sql, params, new CategoryDescription.Mapper());
+            return categoryDescription;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     @Override
     public CategoryDescription create(CategoryDescription categoryDescription) {
         String sql = """
-                insert into oc_product_description(category_id, language_id, description, meta_title, 
-                meta_description, meta_keyword, meta_h1) 
+                insert into oc_category_description(category_id, language_id, name, description, meta_title,
+                meta_description, meta_keyword, meta_h1)
                 values (
                 :categoryId,
-                :languageId
-                :description,
+                :languageId,
+                :name,
+                '',
                 :meta,
                 :meta,
                 :meta,
@@ -69,19 +89,21 @@ public class JdbcCategoryDescriptionRepository implements CategoryDescriptionRep
                 """;
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("categoryId", categoryDescription.getCategoryId());
-        params.addValue("language", LANGUAGE_ID_VALUE);
-        params.addValue("description", categoryDescription.getDescription());
+        params.addValue("languageId", LANGUAGE_ID_VALUE);
+        params.addValue("name", categoryDescription.getName());
         params.addValue("meta", categoryDescription.getMeta());
-        CategoryDescription createdCategoryDescription
-                = jdbcOperations.queryForObject(sql, params, new CategoryDescription.Mapper());
-        return createdCategoryDescription;
+        jdbcOperations.update(sql, params);
+        List<CategoryDescription> createdCategoryDescription
+                = List.of(find(categoryDescription.getCategoryId()));
+        return createdCategoryDescription.get(0);
     }
 
     @Override
     public CategoryDescription update(CategoryDescription categoryDescription) {
         String sql = """
                 update oc_category_description
-                set description = :description,
+                set name = name,
+                description = :description,
                 meta_title = :meta,
                 meta_description = :meta,
                 meta_keyword = :meta,
@@ -89,11 +111,22 @@ public class JdbcCategoryDescriptionRepository implements CategoryDescriptionRep
                 where category_id = :categoryId;
                 """;
         MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("name", categoryDescription.getName());
         params.addValue("description", categoryDescription.getDescription());
         params.addValue("meta", categoryDescription.getMeta());
         params.addValue("categoryId", categoryDescription.getCategoryId());
         CategoryDescription updatedCategoryDescription
                 = jdbcOperations.queryForObject(sql, params, new CategoryDescription.Mapper());
         return updatedCategoryDescription;
+    }
+
+    @Override
+    public void createAllByRequest(List<Object[]> values) {
+
+    }
+
+    @Override
+    public void updateAllByRequest(List<Object[]> values) {
+
     }
 }

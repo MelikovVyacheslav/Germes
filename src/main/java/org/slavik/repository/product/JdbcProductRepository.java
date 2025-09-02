@@ -1,17 +1,22 @@
 package org.slavik.repository.product;
 
 import org.slavik.entity.product.Product;
+import org.slavik.repository.OperationRepository;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
-public class JdbcProductRepository implements ProductRepository {
+public class JdbcProductRepository implements ProductRepository, OperationRepository {
     private final NamedParameterJdbcOperations jdbcOperations;
+    private final JdbcTemplate jdbcTemplate;
 
-    public JdbcProductRepository(NamedParameterJdbcOperations jdbcOperations) {
+    public JdbcProductRepository(NamedParameterJdbcOperations jdbcOperations, JdbcTemplate jdbcTemplate) {
         this.jdbcOperations = jdbcOperations;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     private final String UPC_VALUE = "";
@@ -91,7 +96,8 @@ public class JdbcProductRepository implements ProductRepository {
     public List<Product> findByEAN(String ean) {
         String sql = """
                 select * from oc_product
-                where ean = :ean;
+                where ean = :ean
+                order by product_id;
                 """;
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("ean", ean);
@@ -145,22 +151,14 @@ public class JdbcProductRepository implements ProductRepository {
                     ean = :ean,
                     quantity = :quantity,
                     stock_status_id = :stockStatusId,
-                    image = :image,
-                    manufacturer_id = :manufacturerId,
                     price = :price,
                     weight = :weight,
-                    weight_class_id = :weightClassId,
                     length = :length,
                     width = :width,
                     height = :height,
-                    length_class_id = :lengthClassId,
-                    subtract = :subtract,
-                    status = :status,
-                    date_modified = :dateModify,
-                    dn_id = :dnId
+                    date_modified = :dateModify
                 WHERE product_id = :productId;
                 """;
-
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("productId", product.getProductId());
         params.addValue("model", product.getModel());
@@ -168,22 +166,71 @@ public class JdbcProductRepository implements ProductRepository {
         params.addValue("ean", product.getEan());
         params.addValue("quantity", product.getQuantity());
         params.addValue("stockStatusId", product.getStockStatusId());
-        params.addValue("image", product.getImage());
-        params.addValue("manufacturerId", product.getManufacturerId());
         params.addValue("price", product.getPrice());
         params.addValue("weight", product.getWeight());
-        params.addValue("weightClassId", product.getWeightClassId());
         params.addValue("length", product.getLength());
         params.addValue("width", product.getWidth());
         params.addValue("height", product.getHeight());
-        params.addValue("lengthClassId", product.getLengthClassId());
-        params.addValue("subtract", product.getSubtract());
-        params.addValue("status", product.getStatus());
         params.addValue("dateModify", product.getDateModified());
-        params.addValue("dnId", product.getDnId());
-
         jdbcOperations.update(sql, params);
 
         return product;
+    }
+
+    @Override
+    public void delete(int id) {
+        String sql = """
+                delete from oc_product
+                where product_id = :id;
+                """;
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("id", id);
+        jdbcOperations.update(sql, params);
+    }
+
+    public void deleteAllByRequest(List<Integer> ids) {
+        String sql = """
+                delete from oc_product
+                where product_id in (:ids)
+                """;
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("ids", ids.toArray());
+        jdbcOperations.update(sql, params);
+    }
+
+    @Override
+    public void createAllByRequest(List<Object[]> values) {
+        String sql = """
+                INSERT INTO oc_product (
+                    model, sku, upc, ean, jan, isbn, mpn, location, quantity, stock_status_id, image, video,
+                    manufacturer_id, price, cost, points, tax_class_id,
+                    date_available, weight, weight_class_id, length, width, height,
+                    length_class_id, subtract, status, date_added, date_modified, dn_id, supplier
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """;
+        jdbcTemplate.batchUpdate(sql, values);
+    }
+
+    @Override
+    public void updateAllByRequest(List<Object[]> values) {
+        String sql = """
+                UPDATE oc_product SET
+                quantity = ?,
+                stock_status_id = ?,
+                date_modified = NOW()
+                WHERE product_id = ?;""";
+        jdbcTemplate.batchUpdate(sql, values);
+    }
+
+    public List<Integer> getNewProductIdsByEAN(String ean) {
+        String sql = """
+                select product_id from oc_product
+                where ean = :ean and date_available = current_date()
+                order by product_id;
+                """;
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("ean", ean);
+        List<Integer> productIds = jdbcOperations.queryForList(sql, params, Integer.class);
+        return productIds;
     }
 }

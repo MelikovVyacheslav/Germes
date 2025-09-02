@@ -1,16 +1,20 @@
 package org.slavik.repository.product;
 
 import org.slavik.entity.product.ProductToCategory;
+import org.slavik.repository.OperationRepository;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 
 import java.util.List;
 
-public class JdbcProductToCategoryRepository implements ProductToCategoryRepository {
+public class JdbcProductToCategoryRepository implements ProductToCategoryRepository, OperationRepository {
     private final NamedParameterJdbcOperations jdbcOperations;
+    private final JdbcTemplate jdbcTemplate;
 
-    public JdbcProductToCategoryRepository(NamedParameterJdbcOperations jdbcOperations) {
+    public JdbcProductToCategoryRepository(NamedParameterJdbcOperations jdbcOperations, JdbcTemplate jdbcTemplate) {
         this.jdbcOperations = jdbcOperations;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override
@@ -45,5 +49,14 @@ public class JdbcProductToCategoryRepository implements ProductToCategoryReposit
         params.addValue("categoryId", productToCategory.getCategoryId());
         jdbcOperations.update(sql, params);
         return productToCategory;
+    }
+
+    @Override
+    public void updateAllByRequest(List<Object[]> values) {}
+
+    @Override
+    public void createAllByRequest(List<Object[]> values) {
+        String sql = "insert into oc_product_to_category(product_id, category_id) values (?, ?)";
+        jdbcTemplate.batchUpdate(sql, values);
     }
 }

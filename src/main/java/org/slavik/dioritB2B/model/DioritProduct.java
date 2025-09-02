@@ -18,10 +18,10 @@ public class DioritProduct {
     private String mainPhoto100;
     private String mainPhoto200;
     private List<String> photos;
-    private long stock;
-    private long price;
+    private int stock;
+    private int price;
 
-    private final double PERCENT_VALUE = 20;
+    private final double PERCENT_VALUE = 16;
 
     @JsonProperty("id")
     public UUID getID() { return id; }
@@ -84,12 +84,12 @@ public class DioritProduct {
     public void setPhotos(List<String> value) { this.photos = value; }
 
     @JsonProperty("stock")
-    public long getStock() { return stock; }
+    public int getStock() { return stock; }
     @JsonProperty("stock")
-    public void setStock(long value) { this.stock = value; }
+    public void setStock(int value) { this.stock = value; }
 
     @JsonProperty("price")
-    public long getPrice() { return (int) (price + ((price * PERCENT_VALUE) / 100)); }
+    public int getPrice() { return (int) (price + ((price * PERCENT_VALUE) / 100)); }
     @JsonProperty("price")
     public void setPrice(int value) { this.price = value; }
 

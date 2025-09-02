@@ -1,17 +1,15 @@
 package org.slavik;
 
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
-
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
 
 public class ConnectionManager {
     private final String url;
     private final String user;
     private final String password;
-    private DriverManagerDataSource con;
+    private HikariDataSource dataSource = null;
 
     public ConnectionManager(String url, String user, String password) {
         this.url = url;
@@ -19,17 +17,25 @@ public class ConnectionManager {
         this.password = password;
     }
 
-    public DataSource connection() throws SQLException {
-        DriverManagerDataSource dataSource = new DriverManagerDataSource();
-        dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
-        dataSource.setUrl(url);
-        dataSource.setUsername(user);
-        dataSource.setPassword(password);
-        this.con = dataSource;
+    public HikariDataSource createDataSource() {
+        HikariConfig config = new HikariConfig();
+        config.setJdbcUrl(url);
+        config.setUsername(user);
+        config.setPassword(password);
+        config.setDriverClassName("com.mysql.cj.jdbc.Driver");
+        config.setMaximumPoolSize(20);
+        config.setConnectionTimeout(300000);
+        config.setIdleTimeout(6000000);
+        config.setMaxLifetime(180000000);
+        dataSource = new HikariDataSource(config);
         return dataSource;
     }
 
-    public Connection getConnection() throws SQLException {
-        return con.getConnection();
+    public void disconnect() {
+        dataSource.close();
+    }
+
+    public HikariDataSource getDataSource() {
+        return dataSource;
     }
 }

@@ -21,67 +21,138 @@ public class ShortProduct {
     private int stock;
     private int price;
 
-    private final double PERCENT_VALUE = 20;
+    private final double PERCENT_VALUE = 16;
 
     @JsonProperty("id")
-    public UUID getID() { return id; }
+    public UUID getID() {
+        return id;
+    }
+
     @JsonProperty("id")
-    public void setID(UUID value) { this.id = value; }
+    public void setID(UUID value) {
+        this.id = value;
+    }
 
     @JsonProperty("sku")
-    public String getSku() { return sku; }
+    public String getSku() {
+        return sku;
+    }
+
     @JsonProperty("sku")
-    public void setSku(String value) { this.sku = value; }
+    public void setSku(String value) {
+        this.sku = value;
+    }
 
     @JsonProperty("name")
-    public String getName() { return name; }
+    public String getName() {
+        return name;
+    }
+
     @JsonProperty("name")
-    public void setName(String value) { this.name = value; }
+    public void setName(String value) {
+        this.name = value;
+    }
 
     @JsonProperty("description")
-    public String getDescription() { return description; }
+    public String getDescription() {
+        return description;
+    }
+
     @JsonProperty("description")
-    public void setDescription(String value) { this.description = value; }
+    public void setDescription(String value) {
+        this.description = value;
+    }
 
     @JsonProperty("attributes")
-    public List<Map<String, Attribute>> getAttributes() { return attributes; }
+    public List<Map<String, Attribute>> getAttributes() {
+        return attributes;
+    }
+
     @JsonProperty("attributes")
-    public void setAttributes(List<Map<String, Attribute>> value) { this.attributes = value; }
+    public void setAttributes(List<Map<String, Attribute>> value) {
+        this.attributes = value;
+    }
 
     @JsonProperty("main_photo")
-    public String getMainPhoto() { return mainPhoto; }
+    public String getMainPhoto() {
+        return mainPhoto;
+    }
+
     @JsonProperty("main_photo")
-    public void setMainPhoto(String value) { this.mainPhoto = value; }
+    public void setMainPhoto(String value) {
+        this.mainPhoto = value;
+    }
 
     @JsonProperty("main_photo_50")
-    public String getMainPhoto50() { return mainPhoto50; }
+    public String getMainPhoto50() {
+        return mainPhoto50;
+    }
+
     @JsonProperty("main_photo_50")
-    public void setMainPhoto50(String value) { this.mainPhoto50 = value; }
+    public void setMainPhoto50(String value) {
+        this.mainPhoto50 = value;
+    }
 
     @JsonProperty("main_photo_100")
-    public String getMainPhoto100() { return mainPhoto100; }
+    public String getMainPhoto100() {
+        return mainPhoto100;
+    }
+
     @JsonProperty("main_photo_100")
-    public void setMainPhoto100(String value) { this.mainPhoto100 = value; }
+    public void setMainPhoto100(String value) {
+        this.mainPhoto100 = value;
+    }
 
     @JsonProperty("main_photo_200")
-    public String getMainPhoto200() { return mainPhoto200; }
+    public String getMainPhoto200() {
+        return mainPhoto200;
+    }
+
     @JsonProperty("main_photo_200")
-    public void setMainPhoto200(String value) { this.mainPhoto200 = value; }
+    public void setMainPhoto200(String value) {
+        this.mainPhoto200 = value;
+    }
 
     @JsonProperty("photos")
-    public List<String> getPhotos() { return photos; }
+    public List<String> getPhotos() {
+        return photos;
+    }
+
     @JsonProperty("photos")
-    public void setPhotos(List<String> value) { this.photos = value; }
+    public void setPhotos(List<String> value) {
+        this.photos = value;
+    }
 
     @JsonProperty("stock")
-    public int getStock() { return stock; }
+    public int getStock() {
+        return getQuantity(stock);
+    }
+
+    private int getQuantity(int stock) {
+        if (stock >= 1 && stock <= 10) {
+            return stock;
+        } else if (stock == 11) {
+            return 15;
+        } else if (stock == 12) {
+            return 55;
+        }
+        return stock;
+    }
+
     @JsonProperty("stock")
-    public void setStock(int value) { this.stock = value; }
+    public void setStock(int value) {
+        this.stock = value;
+    }
 
     @JsonProperty("price")
-    public int getPrice() { return (int) (price + ((price * PERCENT_VALUE) / 100)); }
+    public int getPrice() {
+        return (int) (price + (price * (PERCENT_VALUE / 100)));
+    }
+
     @JsonProperty("price")
-    public void setPrice(int value) { this.price = value; }
+    public void setPrice(int value) {
+        this.price = value;
+    }
 
     public Double getHeight() {
         return extractDimension("Высота (см)");
@@ -110,7 +181,7 @@ public class ShortProduct {
             for (Map.Entry<String, Attribute> entry : attributeGroup.entrySet()) {
                 String attributeName = entry.getKey();
                 Attribute attribute = entry.getValue();
-                if ("Группа".equals(attributeName)) {
+                if (attributeName.equals("Группа")) {
                     continue;
                 }
                 if (attribute.doubleValue != null) {
@@ -130,27 +201,10 @@ public class ShortProduct {
         for (Map<String, Attribute> attributeGroup : attributes) {
             Attribute attr = attributeGroup.get(attributeName);
             if (attr != null) {
-                return attr.doubleValue != null ? attr.doubleValue : null;
+                return attr.doubleValue != null ? attr.doubleValue : 0;
             }
         }
-        return null;
-    }
-
-    public String extractLastPartFromUrl(String url) {
-        if (url == null || url.trim().isEmpty()) {
-            throw new IllegalArgumentException("URL не может быть пустым");
-        }
-
-        while (url.endsWith("/")) {
-            url = url.substring(0, url.length() - 1);
-        }
-
-        int lastSlashIndex = url.lastIndexOf('/');
-        if (lastSlashIndex == -1) {
-            return url;
-        }
-
-        return url.substring(lastSlashIndex + 1);
+        return 0.0;
     }
 }
 

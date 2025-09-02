@@ -50,7 +50,7 @@ public class DioritAPIClientImpl extends AbstractApiClient implements DioritApiC
         return responseFlux;
     }
 
-    public DioritProduct viewProduct(UUID productId) {
+    public DioritProduct viewProduct(UUID productId) throws InterruptedException {
         DioritProduct response = webClient.get()
                 .uri(apiSourceConfiguration.baseUrl() + "/api/products/" + productId)
                 .header(apiSourceConfiguration.tokenHeaderKey(), apiSourceConfiguration.token())

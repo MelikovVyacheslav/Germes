@@ -1,4 +1,4 @@
-package org.slavik.ocs;
+package org.slavik.ocs.model;
 
 import com.fasterxml.jackson.annotation.*;
 import org.slavik.entity.product.Product;

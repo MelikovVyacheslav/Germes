@@ -1,16 +1,20 @@
 package org.slavik.repository.attribute;
 
 import org.slavik.entity.attribute.Attribute;
+import org.slavik.repository.OperationRepository;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 
 import java.util.List;
 
-public class JdbcAttributeRepository implements AttributeRepository {
+public class JdbcAttributeRepository implements AttributeRepository, OperationRepository {
     private final NamedParameterJdbcOperations jdbcOperations;
+    private final JdbcTemplate jdbcTemplate;
 
-    public JdbcAttributeRepository(NamedParameterJdbcOperations jdbcOperations) {
+    public JdbcAttributeRepository(NamedParameterJdbcOperations jdbcOperations, JdbcTemplate jdbcTemplate) {
         this.jdbcOperations = jdbcOperations;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override
@@ -64,4 +68,13 @@ public class JdbcAttributeRepository implements AttributeRepository {
                 );
         return attributeId;
     }
+
+    @Override
+    public void createAllByRequest(List<Object[]> values) {
+        String sql = "insert into oc_attribute(attribute_group_id, sort_order) values (?, ?)";
+        jdbcTemplate.batchUpdate(sql, values);
+    }
+
+    @Override
+    public void updateAllByRequest(List<Object[]> values) {}
 }

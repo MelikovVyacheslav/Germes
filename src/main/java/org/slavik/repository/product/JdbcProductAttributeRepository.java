@@ -1,17 +1,20 @@
 package org.slavik.repository.product;
 
 import org.slavik.entity.product.ProductAttribute;
+import org.slavik.repository.OperationRepository;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 
 import java.util.List;
-import java.util.Map;
 
-public class JdbcProductAttributeRepository implements ProductAttributeRepository {
+public class JdbcProductAttributeRepository implements ProductAttributeRepository, OperationRepository {
     private final NamedParameterJdbcOperations jdbcOperations;
+    private final JdbcTemplate jdbcTemplate;
 
-    public JdbcProductAttributeRepository(NamedParameterJdbcOperations jdbcOperations) {
+    public JdbcProductAttributeRepository(NamedParameterJdbcOperations jdbcOperations, JdbcTemplate jdbcTemplate) {
         this.jdbcOperations = jdbcOperations;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override
@@ -64,4 +67,13 @@ public class JdbcProductAttributeRepository implements ProductAttributeRepositor
         ProductAttribute newProductAttribute = find(productAttribute);
         return newProductAttribute;
     }
+
+    @Override
+    public void createAllByRequest(List<Object[]> values) {
+        String sql = "insert into oc_product_attribute(product_id, attribute_id, language_id, text) values (?, ?, ?, ?)";
+        jdbcTemplate.batchUpdate(sql, values);
+    }
+
+    @Override
+    public void updateAllByRequest(List<Object[]> values) {}
 }

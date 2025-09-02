@@ -24,7 +24,6 @@ public class BreezProductResponse {
     private String bimModel;
     private String videoYoutube;
     private List<String> images;
-    private Map<String, Tech> techs;
 
     @JsonProperty("nc")
     public String getNc() { return nc; }
@@ -110,9 +109,4 @@ public class BreezProductResponse {
     public List<String> getImages() { return images; }
     @JsonProperty("images")
     public void setImages(List<String> value) { this.images = value; }
-
-    @JsonProperty("techs")
-    public Map<String, Tech> getTechs() { return techs; }
-    @JsonProperty("techs")
-    public void setTechs(Map<String, Tech> value) { this.techs = value; }
 }

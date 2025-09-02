@@ -6,8 +6,10 @@ public class Order {
     private double value;
     private String currency;
 
+    private final double PERCENT_VALUE = 16;
+
     @JsonProperty("value")
-    public double getValue() { return value; }
+    public double getValue() { return (int) (value + (value * (PERCENT_VALUE / 100))); }
     @JsonProperty("value")
     public void setValue(double value) { this.value = value; }
 

@@ -16,4 +16,5 @@ public interface ProductDescriptionRepository {
 
     ProductDescription update(ProductDescription product);
 
+    void delete(int id);
 }
