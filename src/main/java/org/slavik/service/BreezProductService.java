@@ -242,9 +242,9 @@ public class BreezProductService implements ProductService {
     }
 
     private int[] assignmentOfStockStatus(String nc) throws IOException, InterruptedException {
-        BreezStockInfoResponse breezStockInfoResponse = apiClient.gettingWarehousesWhereTheProductAreLocated(nc);
-        if (breezStockInfoResponse != null) {
-            for (BreezStockInfo breezStockInfo : breezStockInfoResponse.getBreezStockInfoList()) {
+        List<BreezStockInfo> breezStockInfoList = apiClient.gettingWarehousesWhereTheProductAreLocated(nc);
+        if (breezStockInfoList != null) {
+            for (BreezStockInfo breezStockInfo : breezStockInfoList) {
                 if (breezStockInfo.getQuantity() > 0) {
                     if (breezStockInfo.getStock().equals("РРЦ Бриз Ростов LV")) {
                         return new int[]{6, breezStockInfo.getQuantity()};

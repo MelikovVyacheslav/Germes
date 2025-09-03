@@ -3,6 +3,7 @@ package org.slavik.breez;
 import org.slavik.AbstractApiClient;
 import org.slavik.breez.model.*;
 import org.slavik.dioritB2B.APISourceConfiguration;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -73,13 +74,13 @@ public class BreezApiClientImpl extends AbstractApiClient {
         return breezTech;
     }
 
-    public BreezStockInfoResponse gettingWarehousesWhereTheProductAreLocated(String nc) throws IOException, InterruptedException {
-        BreezStockInfoResponse json = webClient.get()
+    public List<BreezStockInfo> gettingWarehousesWhereTheProductAreLocated(String nc) throws IOException, InterruptedException {
+        List<BreezStockInfo> json = webClient.get()
                 .uri(apiSourceConfiguration.baseUrl() + "/leftovers/?nc=" + nc)
                 .header(apiSourceConfiguration.tokenHeaderKey(), apiSourceConfiguration.token())
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
-                .bodyToMono(BreezStockInfoResponse.class)
+                .bodyToMono(new ParameterizedTypeReference<List<BreezStockInfo>>() {})
                 .block();
         return json;
     }
