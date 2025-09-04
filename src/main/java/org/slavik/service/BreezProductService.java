@@ -266,6 +266,13 @@ public class BreezProductService implements ProductService {
 
     private Object[] createProductForUpdate(int productId, BreezProductResponse product) throws SftpException, IOException, InterruptedException {
         int[] stock = assignmentOfStockStatus(product.getNc());
+        if (stock.length == 0) {
+            return new Object[]{
+                    0,
+                    0,
+                    productId
+            };
+        }
         return new Object[]{
                 stock[1],
                 stock[0],
