@@ -144,7 +144,7 @@ public class OcsProductService implements ProductService {
                 addedProducts.add(productAPI.getProduct());
                 i++;
                 System.out.println("Create");
-                if (addedProducts.size() == 3000) {
+                if (addedProducts.size() == 18000) {
                     break;
                 }
             }
