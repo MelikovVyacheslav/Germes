@@ -242,7 +242,14 @@ public class BreezProductService implements ProductService {
     }
 
     private int[] assignmentOfStockStatus(String nc) throws IOException, InterruptedException {
-        List<BreezStockInfo> breezStockInfoList = apiClient.gettingWarehousesWhereTheProductAreLocated(nc);
+        List<BreezStockInfo> breezStockInfoList;
+        try {
+            breezStockInfoList = apiClient.gettingWarehousesWhereTheProductAreLocated(nc);
+        } catch (IOException e) {
+            BreezApiClientImpl newApiClient = new BreezApiClientImpl(apiClient.getWebClient());
+            apiClient = newApiClient;
+            breezStockInfoList = apiClient.gettingWarehousesWhereTheProductAreLocated(nc);
+        }
         if (breezStockInfoList != null) {
             for (BreezStockInfo breezStockInfo : breezStockInfoList) {
                 if (breezStockInfo.getQuantity() > 0) {

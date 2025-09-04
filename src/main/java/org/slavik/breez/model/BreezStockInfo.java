@@ -44,6 +44,9 @@ public class BreezStockInfo {
 
     @JsonProperty("quantity")
     public int getQuantity() {
+        if (quantity.equals(">50")) {
+            return 0;
+        }
         return Integer.parseInt(quantity);
     }
 
