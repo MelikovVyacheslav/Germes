@@ -245,7 +245,7 @@ public class BreezProductService implements ProductService {
         List<BreezStockInfo> breezStockInfoList;
         try {
             breezStockInfoList = apiClient.gettingWarehousesWhereTheProductAreLocated(nc);
-        } catch (IOException e) {
+        } catch (WebClientRequestException e) {
             BreezApiClientImpl newApiClient = new BreezApiClientImpl(apiClient.getWebClient());
             apiClient = newApiClient;
             breezStockInfoList = apiClient.gettingWarehousesWhereTheProductAreLocated(nc);
@@ -463,22 +463,24 @@ public class BreezProductService implements ProductService {
         List<Integer> productIdsToDelete = new ArrayList<>();
         List<Product> productList = jdbcProductRepository.findByEAN("breez");
         boolean isThereProduct;
+        int productIdForDelete = 0;
         int i = 0;
-        for (ProductToProductDescription productToProductDescription : productToProductDescriptionList) {
+        for (Map.Entry<String, BreezProductResponse> productAPI : allProductAPI.entrySet()) {
             isThereProduct = false;
-            for (Map.Entry<String, BreezProductResponse> productAPI : allProductAPI.entrySet()) {
-                if (productToProductDescription.getName().equals(productAPI.getValue().getTitle()) || productList.get(i).getQuantity() == 0) {
+            for (ProductToProductDescription productToProductDescription : productToProductDescriptionList) {
+                if (productToProductDescription.getName().equals(productAPI.getValue().getTitle()) && productList.get(i).getQuantity() == 0 || productList.get(i).getStockStatusId() == 0) {
                     isThereProduct = true;
-                    i++;
+                    productIdForDelete = productToProductDescription.getProductId();
                     break;
                 }
                 i++;
             }
             if (!isThereProduct) {
-                productIdsToDelete.add(productToProductDescription.getProductId());
-                List<ProductImage> currentProductImageList = jdbcProductImageRepository.find(productToProductDescription.getProductId());
+                productIdsToDelete.add(productIdForDelete);
+                List<ProductImage> currentProductImageList = jdbcProductImageRepository.find(productIdForDelete);
                 productImageList.addAll(currentProductImageList);
             }
+            i = 0;
         }
         jdbcProductRepository.deleteAllByRequest(productIdsToDelete);
         jdbcProductDescriptionRepository.deleteAllByRequest(productIdsToDelete);
