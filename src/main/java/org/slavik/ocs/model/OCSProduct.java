@@ -21,6 +21,7 @@ public class OCSProduct {
     private String lineCode;
     private String eaN128;
     private String hsCode;
+    private String codE128;
     private boolean traceable;
     private String condition;
     private String warranty;
@@ -187,6 +188,16 @@ public class OCSProduct {
     @JsonProperty("hsCode")
     public String getHsCode() {
         return hsCode;
+    }
+
+    @JsonProperty("codE128")
+    public String getCodE128() {
+        return codE128;
+    }
+
+    @JsonProperty("codE128")
+    public void setCodE128(String codE128) {
+        this.codE128 = codE128;
     }
 
     @JsonProperty("hsCode")

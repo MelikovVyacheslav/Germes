@@ -29,11 +29,11 @@ public class Main {
         CreateProductService productService = new CreateProductService(dataSource, jschSftpClient, configuration);
 
         DioritProductService dioritProductService = productService.createDioritProductService();
-        dioritProductService.sync();
+//        dioritProductService.sync();
         System.out.println("diorit successful");
 
         BreezProductService breezProductService = productService.createBreezProductService();
-        breezProductService.sync();
+//        breezProductService.sync();
         System.out.println("breez successful");
 
         OcsProductService ocsProductService = productService.createOCSProductService();

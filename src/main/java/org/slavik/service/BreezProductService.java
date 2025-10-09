@@ -183,7 +183,7 @@ public class BreezProductService implements ProductService {
             assignmentOfCategory(addedProducts, productIds, breezCategoryMap);
             createAttribute(addedKeys, productIds);
         }
-        checkForDelete(allProductAPI);
+        jdbcProductRepository.deleteAllByEanWhereQuantityZero("breez");
     }
 
     private Object[] createRequestProduct(BreezProductResponse product, Map<String, BreezBrand> breezBrandMap) throws Exception {
@@ -462,20 +462,20 @@ public class BreezProductService implements ProductService {
         List<ProductToProductDescription> productToProductDescriptionList = jdbcProductToProductDescription.findAllByEAN("breez");
         List<Integer> productIdsToDelete = new ArrayList<>();
         List<Product> productList = jdbcProductRepository.findByEAN("breez");
-        boolean isThereProduct;
+        boolean isDelete;
         int productIdForDelete = 0;
         int i = 0;
         for (Map.Entry<String, BreezProductResponse> productAPI : allProductAPI.entrySet()) {
-            isThereProduct = false;
+            isDelete = false;
             for (ProductToProductDescription productToProductDescription : productToProductDescriptionList) {
-                if (productToProductDescription.getName().equals(productAPI.getValue().getTitle()) && productList.get(i).getQuantity() == 0 || productList.get(i).getStockStatusId() == 0) {
-                    isThereProduct = true;
+                if (productList.get(i).getQuantity() == 0 || productList.get(i).getStockStatusId() == 0) {
+                    isDelete = true;
                     productIdForDelete = productToProductDescription.getProductId();
                     break;
                 }
                 i++;
             }
-            if (!isThereProduct) {
+            if (isDelete) {
                 productIdsToDelete.add(productIdForDelete);
                 List<ProductImage> currentProductImageList = jdbcProductImageRepository.find(productIdForDelete);
                 productImageList.addAll(currentProductImageList);

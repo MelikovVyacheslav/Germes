@@ -198,6 +198,16 @@ public class JdbcProductRepository implements ProductRepository, OperationReposi
         jdbcOperations.update(sql, params);
     }
 
+    public void deleteAllByEanWhereQuantityZero(String ean){
+        String sql = """
+                delete from oc_product
+                where ean = :ean and quantity = 0;
+                """;
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("ean", ean);
+        jdbcOperations.update(sql, params);
+    }
+
     @Override
     public void createAllByRequest(List<Object[]> values) {
         String sql = """
