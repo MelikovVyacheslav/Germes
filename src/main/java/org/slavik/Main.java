@@ -2,7 +2,6 @@ package org.slavik;
 
 import org.slavik.connector.JschSftpClient;
 import org.slavik.connector.SftpClientProperties;
-import org.slavik.dioritB2B.APISourceConfiguration;
 import org.slavik.service.BreezProductService;
 import org.slavik.service.DioritProductService;
 import org.slavik.service.OcsProductService;
@@ -12,11 +11,6 @@ import javax.sql.DataSource;
 public class Main {
     public static void main(String[] args) throws Exception {
 
-//        ConnectionManager connectionManager = new ConnectionManager(
-//                "jdbc:mysql://localhost:3306/u3045843_default?allowMultiQueries=true",
-//                "root",
-//                "221633"
-//        );
         ConnectionManager connectionManager = new ConnectionManager(
                 "jdbc:mysql://80.78.252.245:3310/u3045843_default?allowMultiQueries=true",
                 "u3045843_default",
@@ -29,11 +23,11 @@ public class Main {
         CreateProductService productService = new CreateProductService(dataSource, jschSftpClient, configuration);
 
         DioritProductService dioritProductService = productService.createDioritProductService();
-//        dioritProductService.sync();
+        dioritProductService.sync();
         System.out.println("diorit successful");
 
         BreezProductService breezProductService = productService.createBreezProductService();
-//        breezProductService.sync();
+        breezProductService.sync();
         System.out.println("breez successful");
 
         OcsProductService ocsProductService = productService.createOCSProductService();

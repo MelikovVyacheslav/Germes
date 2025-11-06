@@ -19,7 +19,7 @@ public class OCSAPIClientImpl extends AbstractApiClient implements OCSApiClient 
     private final APISourceConfiguration apiSourceConfiguration
             = new APISourceConfiguration(
             "https://connector.b2b.ocs.ru/api/v2",
-            "TSWJXggwvt59l9nuYVvtSM?iyea0DR",
+            "ML@FPeHwPVvpsT1QYDIzhCHgE3eQjc",
             "X-API-Key",
             100 * 1024 * 1024
     );
@@ -33,7 +33,7 @@ public class OCSAPIClientImpl extends AbstractApiClient implements OCSApiClient 
         WebClient webClient = WebClient.create();
         String responseFlux = webClient.get()
                 .uri("/catalog/categories")
-                .header(apiSourceConfiguration.tokenHeaderKey(), apiSourceConfiguration.token())  // Замени токен!
+                .header(apiSourceConfiguration.tokenHeaderKey(), apiSourceConfiguration.token())
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .bodyToMono(String.class)
