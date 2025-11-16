@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.*;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class DioritProduct {
     private UUID id;
     private Brand brand;

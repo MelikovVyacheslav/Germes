@@ -2,7 +2,7 @@ package org.slavik.dioritB2B.model;
 
 import com.fasterxml.jackson.annotation.*;
 import java.util.List;
-
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class DioritProductResponse {
     private List<ShortProduct> data;
     private Links links;

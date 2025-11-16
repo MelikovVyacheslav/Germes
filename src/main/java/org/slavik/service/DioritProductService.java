@@ -1,7 +1,8 @@
-
 package org.slavik.service;
 
 import com.jcraft.jsch.SftpException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slavik.builder.SqlBuilder;
 import org.slavik.connector.SftpClientProperties;
 import org.slavik.dioritB2B.DioritAPIClientImpl;
@@ -27,6 +28,8 @@ import java.util.Map;
 import java.util.UUID;
 
 public class DioritProductService implements ProductService {
+
+    private static final Logger log = LoggerFactory.getLogger(DioritProductService.class);
 
     private final DioritAPIClientImpl apiClient;
     private final JdbcProductDescriptionRepository jdbcProductDescriptionRepository;
@@ -90,12 +93,19 @@ public class DioritProductService implements ProductService {
 
     @Override
     public void sync() throws Exception {
+        log.info("Starting Diorit product synchronization...");
+
         List<ShortProduct> addedProducts = new ArrayList<>();
         List<ProductToProductDescription> productToProductDescriptions = jdbcProductToProductDescription.findAll();
         List<ShortProduct> allProductAPI = apiClient.getAllProduct();
+
+        log.info("Loaded {} products from API", allProductAPI.size());
+        log.info("Loaded {} products from DB", productToProductDescriptions.size());
+
         boolean isThereProduct;
         SqlBuilder insertBuilder = new SqlBuilder(jdbcProductRepository);
         SqlBuilder updateBuilder = new SqlBuilder(jdbcProductRepository);
+
         for (ShortProduct productAPI : allProductAPI) {
             if (productAPI.getStock() == -1) {
                 continue;
@@ -109,7 +119,7 @@ public class DioritProductService implements ProductService {
                     isThereProduct = true;
                     if (productToProductDescription.getEan().equals("dioritb2b")) {
                         updateBuilder.addRequest(createProductForUpdate(productToProductDescription.getProductId(), productAPI));
-                        System.out.println("Update " + productToProductDescription.getProductId());
+                        log.info("Update request for product ID {}", productToProductDescription.getProductId());
                     }
                     break;
                 }
@@ -123,23 +133,27 @@ public class DioritProductService implements ProductService {
                 }
                 insertBuilder.addRequest(createRequestProduct(productAPI));
                 addedProducts.add(productAPI);
-                System.out.println("Create");
+                log.info("Create request for product '{}'", productAPI.getName());
             }
         }
 
         if (!insertBuilder.isEmpty()) {
+            log.info("Inserting {} new products...", addedProducts.size());
             insertBuilder.insert();
         }
         if (!updateBuilder.isEmpty()) {
+            log.info("Updating existing products...");
             updateBuilder.update();
         }
+
         List<Integer> productIds = jdbcProductRepository.getNewProductIdsByEAN("dioritb2b");
         insertBuilder = new SqlBuilder(jdbcProductDescriptionRepository);
+
         if (!addedProducts.isEmpty()) {
             int i = 0;
             for (ShortProduct product : addedProducts) {
                 insertBuilder.addRequest(
-                        new Object[] {
+                        new Object[]{
                                 productIds.get(i),
                                 LANGUAGE_ID,
                                 product.getName(),
@@ -155,18 +169,24 @@ public class DioritProductService implements ProductService {
                 i++;
             }
         }
+
         if (!insertBuilder.isEmpty()) {
+            log.info("Inserting product descriptions...");
             insertBuilder.insert();
         }
+
         if (!addedProducts.isEmpty()) {
             assignmentOfStore(productIds);
             assignmentOfCategory(productIds);
             createAttribute(addedProducts);
         }
+
         checkForDelete(allProductAPI);
+        log.info("Diorit sync complete. Added: {}, Updated: {}, Total API: {}", addedProducts.size(), updateBuilder.size(), allProductAPI.size());
     }
 
     private void assignmentOfCategory(List<Integer> productIds) {
+        log.info("Assigning categories to {} products...", productIds.size());
         if (productIds.isEmpty()) {
             return;
         }
@@ -178,9 +198,17 @@ public class DioritProductService implements ProductService {
     }
 
     private int brandProductRatio(UUID productId) throws InterruptedException {
-        DioritProduct product = apiClient.viewProduct(productId);
+        log.info("Fetching brand for product {}", productId);
+        DioritProduct product;
+        try {
+             product = apiClient.viewProduct(productId);
+        } catch (Exception e) {
+            Thread.sleep(60000);
+            product = apiClient.viewProduct(productId);
+        }
         Manufacturer manufacturer = jdbcManufacturerRepository.find(product.getBrand().getName());
         if (manufacturer == null) {
+            log.info("Creating new manufacturer '{}'", product.getBrand().getName());
             manufacturer = jdbcManufacturerRepository.create(new Manufacturer(
                     0,
                     product.getBrand().getName()
@@ -190,6 +218,7 @@ public class DioritProductService implements ProductService {
     }
 
     private void createAttribute(List<ShortProduct> products) {
+        log.info("Creating attributes for {} products...", products.size());
         List<Integer> productIds = jdbcProductRepository.getNewProductIdsByEAN("dioritb2b");
         List<String> attributeList = new ArrayList<>();
         SqlBuilder insertBuilderForAttribute = new SqlBuilder(jdbcProductAttributeRepository);
@@ -211,13 +240,10 @@ public class DioritProductService implements ProductService {
                     if (!isThereAttribute) {
                         insertBuilderForAttribute.addRequest(createRequestAttributeToProduct(entry.getValue().toString(), attributeDesc.getAttributeId(), productIds.get(i)));
                         attributeList.add(attributeDesc.getName());
+                        log.trace("Linked attribute '{}' to product {}", attributeDesc.getName(), product.getName());
                     }
                 } else {
-                    Attribute newAttribute = jdbcAttributeRepository.create(new Attribute(
-                            0,
-                            1,
-                            0
-                    ));
+                    Attribute newAttribute = jdbcAttributeRepository.create(new Attribute(0, 1, 0));
                     AttributeDescription newAttributeDescription =
                             jdbcAttributeDescriptionRepository.create(new AttributeDescription(
                                     newAttribute.getAttributeId(),
@@ -226,12 +252,106 @@ public class DioritProductService implements ProductService {
                             ));
                     insertBuilderForAttribute.addRequest(createRequestAttributeToProduct(entry.getValue().toString(), newAttributeDescription.getAttributeId(), productIds.get(i)));
                     attributeList.add(entry.getValue().toString());
+                    log.trace("Created new attribute '{}' for product {}", entry.getValue(), product.getName());
                 }
             }
             i++;
         }
         if (!insertBuilderForAttribute.isEmpty()) {
+            log.info("Inserting attribute bindings...");
             insertBuilderForAttribute.insert();
+        }
+    }
+
+    private void addAllPhoto(List<String> photos, int productId) throws Exception {
+        if (photos.size() == 1) {
+            return;
+        }
+        log.info("Uploading {} additional photos for product {}", photos.size() - 1, productId);
+        int sortOrder = 1;
+        SqlBuilder insertBuilder = new SqlBuilder(jdbcProductImageRepository);
+        for (int i = 1; i < photos.size(); i++) {
+            insertBuilder.addRequest(new Object[]{productId, uploadPhoto(photos.get(i)), sortOrder});
+            sortOrder++;
+        }
+        if (!insertBuilder.isEmpty()) {
+            insertBuilder.insert();
+        }
+    }
+
+    private String uploadPhoto(String fileUrl) throws Exception {
+        String locationPath = "/var/www/u3045843/data/www/germes.vip/image/catalog/b2b";
+        String fileName = extractFileNameFromUrl(fileUrl);
+        InputStream inputStream;
+        try {
+            inputStream = new URL(fileUrl).openStream();
+            try {
+                if (jschSftpClient.isFileExist(fileName, locationPath)) {
+                    log.trace("Photo '{}' already exists on remote host", fileName);
+                    return "catalog/b2b/" + fileName;
+                }
+                jschSftpClient.uploadFile(inputStream, locationPath, fileName);
+                log.info("Uploaded photo '{}'", fileName);
+            } catch (Exception e) {
+                log.warn("Reconnecting SFTP client during upload of '{}'", fileName);
+                JschSftpClient newJschSftpClient = new JschSftpClient(configuration);
+                jschSftpClient = newJschSftpClient;
+                jschSftpClient.uploadFile(inputStream, locationPath, fileName);
+            }
+        } catch (IOException e) {
+            log.error("Failed to load photo from URL: {}", fileUrl);
+            return null;
+        }
+        return "catalog/b2b/" + fileName;
+    }
+
+    private void checkForDelete(List<ShortProduct> allProductAPI) throws Exception {
+        log.info("Checking for products to delete...");
+        List<ProductImage> productImageList = new ArrayList<>();
+        List<ProductToProductDescription> productToProductDescriptionList = jdbcProductToProductDescription.findAllByEAN("dioritb2b");
+        List<Integer> productIdsToDelete = new ArrayList<>();
+        boolean isThereProduct;
+        for (ProductToProductDescription productToProductDescription : productToProductDescriptionList) {
+            isThereProduct = false;
+            for (ShortProduct product : allProductAPI) {
+                if (productToProductDescription.getName().equals(product.getName())) {
+                    isThereProduct = true;
+                    break;
+                }
+            }
+            if (!isThereProduct) {
+                productIdsToDelete.add(productToProductDescription.getProductId());
+                List<ProductImage> currentProductImageList = jdbcProductImageRepository.find(productToProductDescription.getProductId());
+                productImageList.addAll(currentProductImageList);
+                log.info("Marking product '{}' for deletion", productToProductDescription.getName());
+            }
+        }
+        jdbcProductRepository.deleteAllByRequest(productIdsToDelete);
+        jdbcProductDescriptionRepository.deleteAllByRequest(productIdsToDelete);
+        deleteAllPhoto(productImageList);
+        log.info("Deleted {} products and {} images", productIdsToDelete.size(), productImageList.size());
+    }
+
+    private void deleteAllPhoto(List<ProductImage> allProductImage) throws Exception {
+        String localPath = "/var/www/u3045843/data/www/germes.vip/image/catalog/b2b";
+        log.info("Deleting {} photos from remote host", allProductImage.size());
+        for (ProductImage productImage : allProductImage) {
+            String fileName = extractFileNameFromUrl(productImage.getImage());
+            try {
+                jschSftpClient.removeFile(fileName, localPath);
+                log.trace("Removed remote file '{}'", fileName);
+            } catch (Exception e) {
+                log.warn("Reconnecting SFTP client while deleting '{}'", fileName);
+                JschSftpClient newJschSftpClient = new JschSftpClient(configuration);
+                jschSftpClient = newJschSftpClient;
+                try {
+                    jschSftpClient.removeFile(fileName, localPath);
+                    log.trace("Removed remote file after reconnect '{}'", fileName);
+                } catch (Exception ex) {
+                    log.error("Failed to remove file '{}'", fileName);
+                    continue;
+                }
+            }
         }
     }
 
@@ -268,44 +388,10 @@ public class DioritProductService implements ProductService {
                 DN_ID,
                 SUPPLIER_VALUE
         };
-//        return "(" + creatorOfSkuNumbers(product.getSku()) + ", " +
-//                creatorOfSkuNumbers(product.getSku()) + ", " +
-//                UPC_VALUE + ", " +
-//                EAN_VALUE + ", " +
-//                JAN_VALUE + ", " +
-//                ISBN_VALUE + ", " +
-//                MPN_VALUE + ", " +
-//                LOCATION_VALUE + ", " +
-//                product.getStock() + ", " +
-//                determineStockStatus(product.getStock()) + ", '" +
-//                uploadPhoto(product.getMainPhoto()) + "', " +
-//                VIDEO_VALUE + ", " +
-//                brandProductRatio(product.getID()) + ", " +
-//                product.getPrice() + ", " +
-//                COST_VALUE + ", " +
-//                POINTS_VALUE + ", " +
-//                TAX_CLASS_ID_VALUE + ", " +
-//                "CURRENT_DATE()" + ", " +
-//                product.getWeight() + ", " +
-//                WEIGHT_CLASS_ID + ", " +
-//                product.getLength() + ", " +
-//                product.getWidth() + ", " +
-//                product.getHeight() + ", " +
-//                LENGTH_CLASS_ID + ", " +
-//                SUBTRACT_VALUE + ", " +
-//                STATUS_VALUE + ", " +
-//                "NOW()" + ", " +
-//                "NOW()" + ", " +
-//                DN_ID + ", " +
-//                SUPPLIER_VALUE + "),";
     }
 
     private int determineStockStatus(int quantity) {
-        if (quantity == 0) {
-            return 9;
-        } else {
-            return 7;
-        }
+        return quantity == 0 ? 9 : 7;
     }
 
     private Object[] createProductForUpdate(int productId, ShortProduct product) {
@@ -314,11 +400,6 @@ public class DioritProductService implements ProductService {
                 determineStockStatus(product.getStock()),
                 productId
         };
-//        return " UPDATE oc_product SET " +
-//                "quantity = " + product.getStock() + ", " +
-//                "stock_status_id = " + determineStockStatus(product.getStock()) + ", " +
-//                "date_modified = NOW()" +
-//                "WHERE product_id = " + productId + ";";
     }
 
     private Object[] createRequestAttributeToProduct(String text, int attributeId, int productId) {
@@ -328,59 +409,18 @@ public class DioritProductService implements ProductService {
                 LANGUAGE_ID,
                 text
         };
-//        return "(" + productId + ", " +
-//                attributeId + ", " +
-//                LANGUAGE_ID + ", '" +
-//                text + "'),";
     }
 
     private final int STORE_ID_VALUE = 0;
 
     private void assignmentOfStore(List<Integer> productIds) {
+        log.info("Assigning store to {} products...", productIds.size());
         SqlBuilder insertBuilder = new SqlBuilder(jdbcProductToStore);
         for (int productId : productIds) {
             insertBuilder.addRequest(new Object[]{productId, STORE_ID_VALUE});
         }
         insertBuilder.insert();
     }
-
-    private void addAllPhoto(List<String> photos, int productId) throws Exception {
-        if (photos.size() == 1) {
-            return;
-        }
-        int sortOrder = 1;
-        SqlBuilder insertBuilder = new SqlBuilder(jdbcProductImageRepository);
-        for (int i = 1; i < photos.size(); i++) {
-            insertBuilder.addRequest(new Object[]{productId, uploadPhoto(photos.get(i)), sortOrder});
-            sortOrder++;
-        }
-        if (!insertBuilder.isEmpty()) {
-            insertBuilder.insert();
-        }
-    }
-
-    private String uploadPhoto(String fileUrl) throws Exception {
-        String locationPath = "/var/www/u3045843/data/www/germes.vip/image/catalog/b2b";
-        String fileName = extractFileNameFromUrl(fileUrl);
-        InputStream inputStream;
-        try {
-            inputStream = new URL(fileUrl).openStream();
-            try {
-                if (jschSftpClient.isFileExist(fileName, locationPath)) {
-                    return "catalog/b2b/" + fileName;
-                }
-                jschSftpClient.uploadFile(inputStream, locationPath, fileName);
-            } catch (Exception e) {
-                JschSftpClient newJschSftpClient = new JschSftpClient(configuration);
-                jschSftpClient = newJschSftpClient;
-                jschSftpClient.uploadFile(inputStream, locationPath, fileName);
-            }
-        } catch (IOException e) {
-            return null;
-        }
-        return "catalog/b2b/" + fileName;
-    }
-
 
     public static String extractFileNameFromUrl(String url) {
         if (url == null || url.isEmpty()) return "";
@@ -389,47 +429,5 @@ public class DioritProductService implements ProductService {
 
     private String creatorOfSkuNumbers(String sku) {
         return sku + "30";
-    }
-
-    private void checkForDelete(List<ShortProduct> allProductAPI) throws Exception {
-        List<ProductImage> productImageList = new ArrayList<>();
-        List<ProductToProductDescription> productToProductDescriptionList = jdbcProductToProductDescription.findAllByEAN("dioritb2b");
-        List<Integer> productIdsToDelete = new ArrayList<>();
-        boolean isThereProduct;
-        for (ProductToProductDescription productToProductDescription : productToProductDescriptionList) {
-            isThereProduct = false;
-            for (ShortProduct product : allProductAPI) {
-                if (productToProductDescription.getName().equals(product.getName())) {
-                    isThereProduct = true;
-                    break;
-                }
-            }
-            if (!isThereProduct) {
-                productIdsToDelete.add(productToProductDescription.getProductId());
-                List<ProductImage> currentProductImageList = jdbcProductImageRepository.find(productToProductDescription.getProductId());
-                productImageList.addAll(currentProductImageList);
-            }
-        }
-        jdbcProductRepository.deleteAllByRequest(productIdsToDelete);
-        jdbcProductDescriptionRepository.deleteAllByRequest(productIdsToDelete);
-        deleteAllPhoto(productImageList);
-    }
-
-    private void deleteAllPhoto(List<ProductImage> allProductImage) throws Exception {
-        String localPath = "/var/www/u3045843/data/www/germes.vip/image/catalog/b2b";
-        for (ProductImage productImage : allProductImage) {
-            String fileName = extractFileNameFromUrl(productImage.getImage());
-            try {
-                jschSftpClient.removeFile(fileName, localPath);
-            } catch (Exception e) {
-                JschSftpClient newJschSftpClient = new JschSftpClient(configuration);
-                jschSftpClient = newJschSftpClient;
-                try {
-                    jschSftpClient.removeFile(fileName, localPath);
-                } catch (Exception ex) {
-                    continue;
-                }
-            }
-        }
     }
 }

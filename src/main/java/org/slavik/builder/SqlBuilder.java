@@ -72,5 +72,7 @@ public class SqlBuilder {
         return valuesList.isEmpty();
     }
 
-
+    public Integer size() {
+        return valuesList.size();
+    }
 }

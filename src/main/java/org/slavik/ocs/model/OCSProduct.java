@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.*;
 
 import java.util.List;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class OCSProduct {
     private int price;
     private Location location;

@@ -1,11 +1,12 @@
 package org.slavik.breez.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
-
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class BreezProductResponse {
     private String nc;
     private String ncVnutr;
