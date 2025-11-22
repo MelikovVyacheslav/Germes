@@ -278,7 +278,7 @@ public class OCSProduct {
     }
 
     public int getStockStatus(String description) {
-        if (description.equals("Санкт-Петербург") || description.equals("Москва") || description.equals("Воронеж") || description.equals("Ростов-на-Дону")) {
+        if (description.equals("Санкт-Петербург") || description.equals("Москва") || description.equals("Дальний транзит (до 7дн.)") || description.equals("Ростов-на-Дону")) {
             return 6;
         } else if (description.equals("Пятигорск")) {
             return 7;

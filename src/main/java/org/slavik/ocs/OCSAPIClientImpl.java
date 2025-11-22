@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slavik.AbstractApiClient;
 import org.slavik.dioritB2B.APISourceConfiguration;
-import org.slavik.ocs.model.OCSProduct;
 import org.slavik.ocs.model.OCSProductCharacteristics;
 import org.slavik.ocs.model.OCSProductResponse;
 import org.slavik.ocs.model.Result;
@@ -155,25 +154,30 @@ public class OCSAPIClientImpl extends AbstractApiClient implements OCSApiClient 
         return jsonResponse;
     }
 
-    public OCSProductCharacteristics postingAllProductCharacteristics(List<Result> allProductAPI) {
+    public OCSProductCharacteristics postingAllProductCharacteristicsByItemsId(List<Result> allProductAPI) {
         OCSProductCharacteristics finalJsonResponse = new OCSProductCharacteristics();
         for (Result productAPI : allProductAPI) {
             addToBody(productAPI.getProduct().getItemID());
             if (itemIds.size() == 2500) {
-                OCSProductCharacteristics currentJsonResponse = webClient.post()
-                        .uri(apiSourceConfiguration.baseUrl() + "/content/batch")
-                        .header(apiSourceConfiguration.tokenHeaderKey(), apiSourceConfiguration.token())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .bodyValue(requestBuild())
-                        .retrieve()
-                        .bodyToMono(OCSProductCharacteristics.class)
-                        .block();
-                assert currentJsonResponse != null;
-                finalJsonResponse.getResult().addAll(currentJsonResponse.getResult());
+                finalJsonResponse.getResult().addAll(getAllProductCharacteristicsByItemsId().getResult());
                 itemIds = new ArrayList<>();
             }
         }
+        if (!itemIds.isEmpty()) {
+            finalJsonResponse.getResult().addAll(getAllProductCharacteristicsByItemsId().getResult());
+        }
         return finalJsonResponse;
+    }
+
+    private OCSProductCharacteristics getAllProductCharacteristicsByItemsId() {
+        return webClient.post()
+                .uri(apiSourceConfiguration.baseUrl() + "/content/batch")
+                .header(apiSourceConfiguration.tokenHeaderKey(), apiSourceConfiguration.token())
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestBuild())
+                .retrieve()
+                .bodyToMono(OCSProductCharacteristics.class)
+                .block();
     }
 
     public void addToBody(String itemId) {

@@ -107,7 +107,7 @@ public class OcsProductService implements ProductService {
         logger.info("OCS sync started");
 
         List<Result> allProductAPI = apiClient.getAll();
-        OCSProductCharacteristics ocsProductCharacteristics = apiClient.postingAllProductCharacteristics(allProductAPI);
+        OCSProductCharacteristics ocsProductCharacteristics = apiClient.postingAllProductCharacteristicsByItemsId(allProductAPI);
 
         SqlBuilder insertBuilder = new SqlBuilder(jdbcProductRepository);
         SqlBuilder updateBuilder = new SqlBuilder(jdbcProductRepository);
@@ -125,16 +125,16 @@ public class OcsProductService implements ProductService {
             isThereProduct = false;
             for (ProductToProductDescription productToProductDescription : productToProductDescriptionList) {
                 if (productToProductDescription.getName().equals(productAPI.getProduct().getItemName())) {
-                    isThereProduct = true;
                     if (productToProductDescription.getEan().equals(EAN_VALUE)) {
+                        isThereProduct = true;
                         try {
                             updateBuilder.addRequest(createProductForUpdate(productToProductDescription.getProductId(), productAPI));
+                            i++;
                             logger.info("Update product id {}", productToProductDescription.getProductId());
                         } catch (Exception e) {
                             logger.info("Failed update product id {}", productToProductDescription.getProductId());
                         }
                     }
-                    i++;
                     break;
                 }
             }
